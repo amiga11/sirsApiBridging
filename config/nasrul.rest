@@ -1,0 +1,209 @@
+### RL 3.7 READ
+GET http://localhost:5001/apisirs/rltigatitiktujuh?tahun=2020
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzM1ODA2MzAsImV4cCI6MTY3MzU4MDY2NX0.8a7HmVp3aOLyVq0CcelDV6nSGJKLG-URagFtle9f-f0
+
+### RL 3.7 Detail READ
+GET http://localhost:5001/apisirs/rltigatitiktujuhdetail
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzM1ODA4MzQsImV4cCI6MTY3MzU4MDg2OX0.8p-Ks76YmBUQFMH_p_TPSbZBdjuIcbxD5-8vGLp8tV0
+
+### RL 3.7 Detail Delete
+DELETE  http://localhost:5001/apisirs/rltigatitiktujuhdetail/18
+
+### RL 3.7 Detail Update
+PATCH http://localhost:5001/apisirs/rltigatitiktujuhdetail/7
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzM1ODA4MzQsImV4cCI6MTY3MzU4MDg2OX0.8p-Ks76YmBUQFMH_p_TPSbZBdjuIcbxD5-8vGLp8tV0
+
+{
+
+      
+      "rl_tiga_titik_tujuh_id": 16,
+      "user_id": 26,
+      "jenis_kegiatan_id": 324,
+      "jumlah": 
+    }
+
+### RL 3.7 Post
+POST  http://localhost:5001/apisirs/rltigatitiktujuh
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzM0OTMxMTgsImV4cCI6MTY3MzQ5MzE1M30.UEeVWtMyf6hwdU-GZXRy_cZdv_-OF5smHWNgvYnAlLE
+
+{
+    "tahun": 2000,
+    "data": [
+        {
+            "jenisKegiatanId": 2,
+            "jumlah": 13
+            
+        },
+        {
+            "jenisKegiatanId": 2,
+            "jumlah": 13
+           
+        }
+    ]
+}
+
+### RL 3.12
+
+### RL 3.12 READ
+GET http://localhost:5001/apisirs/rltigatitikduabelas?tahun=2000
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzM0MzM1MjIsImV4cCI6MTY3MzQzMzU1N30.yEEa1zu2DzOdaRP8Gxz7vdKrJfftuVJQsXU8HOp1-Dk
+
+
+### RL 3.12 Post
+POST  http://localhost:5001/apisirs/rltigatitikduabelas
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzM0MzE1NTcsImV4cCI6MTY3MzQzMTU5Mn0.H2LnoyFwcsrEwbkGAHO22iDW3aNbNI_rOOVmICTVyPE
+
+{
+    "tahun": 2020,
+    "data": [
+       
+        {
+            "metodaId": 1,
+                   "konselingAnc": 0,
+                    "konselingPascaPersalinan": 0,
+                    "kbBaruBukanRujukan": 0,
+                    "kbBaruRujukanInap": 0,
+                    "kbBaruRujukanJalan": 0,
+                    "kbBaruTotal": 0,
+                    "kbBaruPascaPersalinan": 0,
+                    "kbBaruAbortus": 0,
+                    "kbBaruLainnya": 0,
+                    "kunjunganUlang": 0,
+                    "keluhanEfekSampingJumlah": 0,
+                    "keluhanEfekSampingDirujuk": 0
+        }
+    ]
+}
+
+### RL 3.12 Detail READ
+GET http://localhost:5001/apisirs/rltigatitikduabelasdetail
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzM1ODA4MzQsImV4cCI6MTY3MzU4MDg2OX0.8p-Ks76YmBUQFMH_p_TPSbZBdjuIcbxD5-8vGLp8tV0
+
+### RL 3.12 Detail Delete
+DELETE  http://localhost:5001/apisirs/rltigatitikduabelasdetail/18
+
+### RL 3.12 Detail Update
+PATCH http://localhost:5001/apisirs/rltigatitikduabelasdetail/7
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzM1ODA4MzQsImV4cCI6MTY3MzU4MDg2OX0.8p-Ks76YmBUQFMH_p_TPSbZBdjuIcbxD5-8vGLp8tV0
+
+{
+
+      
+      "rl_tiga_titik_dua_belas_id": 16,
+      "user_id": 26,
+      "metoda_id": 324,
+      "konseling_anc": 0,
+        "konseling_pasca_persalinan": 0,
+                    "kb_baru_bukan_rujukan": 0,
+                    "kb_baru_rujukan_inap": 0,
+                    "kb_baru_rujukan_jalan": 0,
+                    "kb_baru_total": 0,
+                    "kb_baru_pasca_persalinan": 0,
+                    "kb_baru_abortus": 0,
+                    "kb_baru_lainnya": 0,
+                    "kunjungan_ulang": 0,
+                    "keluhan_efek_samping_jumlah": 0,
+                    "keluhan_efek_samping_dirujuk": 0
+    }
+
+### RL 3.13A
+
+### RL 3.13A READ
+GET http://localhost:5001/apisirs/rltigatitiktigabelasa?tahun=2000
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzM0MzM1MjIsImV4cCI6MTY3MzQzMzU1N30.yEEa1zu2DzOdaRP8Gxz7vdKrJfftuVJQsXU8HOp1-Dk
+
+
+### RL 3.13A Post
+POST  http://localhost:5001/apisirs/rltigatitiktigabelasa
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzM0MzE1NTcsImV4cCI6MTY3MzQzMTU5Mn0.H2LnoyFwcsrEwbkGAHO22iDW3aNbNI_rOOVmICTVyPE
+
+{
+    "tahun": 2020,
+    "data": [
+       
+        {
+            "golonganObatId": 1,
+                  
+        }
+    ]
+}
+
+### RL 3.13A Detail READ
+GET http://localhost:5001/apisirs/rltigatitiktigabelasadetail
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzM1ODA4MzQsImV4cCI6MTY3MzU4MDg2OX0.8p-Ks76YmBUQFMH_p_TPSbZBdjuIcbxD5-8vGLp8tV0
+
+### RL 3.12 Detail Delete
+DELETE  http://localhost:5001/apisirs/rltigatitiktigabelasadetail/18
+
+### RL 3.12 Detail Update
+PATCH http://localhost:5001/apisirs/rltigatitiktigabelasadetail/7
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzM1ODA4MzQsImV4cCI6MTY3MzU4MDg2OX0.8p-Ks76YmBUQFMH_p_TPSbZBdjuIcbxD5-8vGLp8tV0
+
+{
+
+      
+      "rl_tiga_titik_dua_belas_id": 16,
+      "user_id": 26,
+      "golongan_obat_id": 324,
+      "konseling_anc": 0
+    }
+
+### RL 5.4
+
+### RL 5.4 Post
+POST  http://localhost:5001/apisirs/rllimatitikempat
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzQxMTUwNTAsImV4cCI6MTY3NDExNTA4NX0.owTmILcm-mTVDZGJO6e467cO2iuPHb4TfR6n6VNhDT4
+
+{
+    "tahun": 2022,
+    "tahunDanBulan": "2022-01-01",
+    "data": [
+        {
+            "kodeIcd10": "A01.0",
+            "deskripsi": "Typhoid fever",
+            "kasusBaruLk": 0,
+            "kasusBaruPr": 2,
+            
+            "jumlahKunjungan": 5
+            
+        }
+       
+    ]
+}
+
+
+### RL 5.4 READ
+GET http://localhost:5001/apisirs/rllimatitikempatdetail?tahun=2022-01-01
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzQxMjQ0NDQsImV4cCI6MTY3NDEyNDQ3OX0.Whe4S5lmoe-RaDbp-vgh0sJ9PA2Z_6Vt9DUaiOIKaIs
+
+### RL 5.4 Detail READ
+GET http://localhost:5001/apisirs/rllimatitikempatdetail
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzM1ODA4MzQsImV4cCI6MTY3MzU4MDg2OX0.8p-Ks76YmBUQFMH_p_TPSbZBdjuIcbxD5-8vGLp8tV0
+
+### RL 5.4 Detail Delete
+DELETE  http://localhost:5001/apisirs/rllimatitikempatdetail/18
+
+### RL 5.4 Detail Update
+PATCH http://localhost:5001/apisirs/rllimatitikempatdetail/7
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzM1ODA4MzQsImV4cCI6MTY3MzU4MDg2OX0.8p-Ks76YmBUQFMH_p_TPSbZBdjuIcbxD5-8vGLp8tV0
+
+{
+
+      
+      "rl_lima_titik_empat_id": 16,
+      "user_id": 26,
+      "kode_icd_10": "A01.0",
+            "deskripsi": "Typhoid fever",
+            "kasus_baru_lk": 0,
+            "kasus_baru_pr": 2,
+            
+            "jumlah_kunjungan": 5
+    }

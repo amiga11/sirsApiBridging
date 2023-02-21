@@ -1,0 +1,184 @@
+### Get User Data
+GET http://localhost:5000/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjYsIm5hbWEiOiJkd2lwIiwiZW1haWwiOiJrb3Rha2VsZWt0cm9uaWtAZ21haWwuY29tIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzI5NzQ3MTMsImV4cCI6MTY3MzA2MTExM30.yLEXr93n-48p1oY3qlnt3C_-5gCwtNt3LsfknWVjMrw
+
+### Get Data Rumah Sakit
+GET http://localhost:5000/rumahsakit/3174063
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjYsIm5hbWEiOiJkd2lwIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzMzMTI3ODYsImV4cCI6MTY3MzMxMjg0Nn0.qcfLrQ3OzX_FshenoRQ_paNbekK7kJtp2c90toAhYKE
+
+### Insert New User
+POST http://localhost:5000/users
+Content-Type: application/json
+
+{
+    "nama": "dwip",
+    "email": "kotakelektronik@gmail.com",
+    "password": "12345",
+    "rsId": "3174063"
+}
+
+### Login
+POST http://localhost:5000/login
+Content-Type: application/json
+
+{
+    "userName": "3174063",
+    "password": "12345"
+}
+
+### Logut
+DELETE http://localhost:5000/logout
+
+
+
+### Jenis Pelayanan RL 3.1
+GET http://localhost:5000/jenispelayanan?rlid=1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjYsIm5hbWEiOiJkd2lwIiwiZW1haWwiOiJrb3Rha2VsZWt0cm9uaWtAZ21haWwuY29tIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzI5NzQ3NDgsImV4cCI6MTY3MzA2MTE0OH0.yssXtzZyKNI4NB0PqMd52EnWE726lXzapFlOwWVsA4w
+
+### RL 3.1 READ
+GET http://localhost:5000/rltigatitiksatu?tahun=2022
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzM0MjQzODEsImV4cCI6MTY3MzQyNDQxNn0.Snb1nnOHNNnctsURgWjh52wT8xuKCV6iddBcKepzxJI
+
+### RL 3.1 CREATE
+POST http://localhost:5000/rltigatitiksatu
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjcsIm5hbWEiOiJpbmF5IiwiZW1haWwiOiJpbmF5QGdtYWlsLmNvbSIsInJzSWQiOiIxIiwiaWF0IjoxNjcyOTkwNDk1LCJleHAiOjE2NzI5OTA1NTV9.oonoAHfPsvUhAcWtucGNOnVALXXswBthYs4BnwlhCaE
+
+{
+    "tahun": 1902,
+    "data": [
+        {
+            "jenisPelayananId": 1,
+            "jumlahPasienAwalTahun": 2,
+            "jumlahPasienMasuk": 3,
+            "pasienKeluarHidup": 4,
+            "kurangDari48Jam": 4,
+            "lebihDariAtauSamaDengan48Jam":5,
+            "jumlahLamaDirawat": 5,
+            "jumlahPasienAkhirTahun": 6,
+            "jumlahHariPerawatan": 7,
+            "kelasVVIP": 8,
+            "kelasVIP": 9,
+            "kelas1": 10,
+            "kelas2": 11,
+            "kelas3": 12,
+            "kelasKhusus": 13
+        },
+        {
+            "jenisPelayananId": 2,
+            "jumlahPasienAwalTahun": 3,
+            "jumlahPasienMasuk": 4,
+            "pasienKeluarHidup": 5,
+            "kurangDari48Jam": 6,
+            "lebihDariAtauSamaDengan48Jam":7,
+            "jumlahLamaDirawat": 5,
+            "jumlahPasienAkhirTahun": 6,
+            "jumlahHariPerawatan": 7,
+            "kelasVVIP": 8,
+            "kelasVIP": 9,
+            "kelas1": 10,
+            "kelas2": 11,
+            "kelas3": 12,
+            "kelasKhusus": 13
+        }
+    ]
+}
+### RL Satu titik Dua
+POST http://localhost:5000/rlsatutitikdua
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzQxMDM2OTEsImV4cCI6MTY3NDEwMzc1MX0.prWAlCyf3tZBB_WQCJp9S1GKGVud0_v56Jkzvn9mhiU
+
+{
+    "tahun": 20999,
+            "bor" : 21.13,
+            "los" : 23,
+            "bto" : 24.12,
+            "toi" : 25.12,
+            "ndr" : 26.12,
+            "gdr" : 27.12,
+            "rataKunjungan": 28
+         
+}
+
+### GET RL12
+GET http://localhost:5000/rlsatutitikduadetail/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzQxMjA3NDEsImV4cCI6MTY3NDEyMDgwMX0.Ucsaype8739EinJWR-4M1a9guoH67U9cmWVY0yivuUo
+
+
+
+### RL 3.7 Detail Delete
+DELETE  http://localhost:5000/rlsatutitikdua/29
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzM1MDY5ODIsImV4cCI6MTY3MzUwNzAxN30.PrBW6Pc5VLnV-SA41K6ZPGIMj8zaqb07ZVK2MMVvUSo
+
+
+### RL 3.7 Detail Update
+PATCH http://localhost:5000/rlsatutitikdua/1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzQyMDE1NzMsImV4cCI6MTY3NDIwMTYzM30.lZpRSSaljPBtQ2Zj0iavJkME43B-Ifdl4S6O94jPgi0
+
+        { 
+            "bor" : 21.13,
+            "los" : 23,
+            "bto" : 24.12,
+            "toi" : 25.12,
+            "ndr" : 26,
+            "gdr" : 27.12,
+            "rata_kunjungan": 1122
+        }
+
+
+### get for edit
+GET http://localhost:5000/rlsatutitikdua/23
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzM1NDUzNzgsImV4cCI6MTY3MzU0NTQxM30.pKrZ0yw-mqHCbShhD9qEokgVMluXPiZdFWcvHvg8BBA
+
+### delet 12
+DELETE http://localhost:5000/rlsatutitikdua/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzQxMjQxNjMsImV4cCI6MTY3NDEyNDIyM30.oppl0qi8vqp6lXEsqHdetWGHTAuWprZ_9gOGObFJaJU
+
+
+### RL Satu titik Dua
+POST http://localhost:5000/rllimatitiktiga
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDMzLCJuYW1hIjoiUlMgS2Fua2VyIERoYXJtYWlzIiwiZW1haWwiOiIzMTc0MDYzIiwicnNJZCI6IjMxNzQwNjMiLCJpYXQiOjE2NzQxOTQwODcsImV4cCI6MTY3NDE5NDE0N30.pbJ16R2xxrLtGXK20jIIY6RF_T-TeYSI500MbiZyaxc
+
+{
+    "tahun": 2022,
+    "data": [
+        {
+        "kodeIcdSepuluh": "A00",
+        "deskripsi":"Cholera",
+        "pasienKeluarHidupMenurutJeniskelaminLK":10,
+        "pasienKeluarHidupMenurutJeniskelaminPR":10,
+        "pasienKeluarMatiMenurutJeniskelaminLK":10,
+        "pasienKeluarMatiMenurutJeniskelaminPR":10,
+        "totalALL":40
+        }
+    ]
+}
+
+### Get Token
+
+GET http://localhost:5000/token
+
+### Login
+POST http://localhost:5000/login
+Content-Type: application/json
+
+{
+    "userName": "1110027",
+    "password": "12345"
+}
+
+###RL 5.4 Post 
+PATCH  http://localhost:5000/rllimatitiktigadetail/5
+Content-Type: application/json 
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDgsIm5hbWEiOiJSUyBVbXVtIE1hbGFoYXlhdGkiLCJlbWFpbCI6IjExMTAwMjciLCJyc0lkIjoiMTExMDAyNyIsImlhdCI6MTY3NDM5MTQ5MiwiZXhwIjoxNjc0MzkxNTUyfQ.XwUlv-X5sOjRcs5vWwA9PjF0Tid0YACuMri72sNBbwc
+
+{
+    "kode_icd_10": "A01.1",
+    "deskripsi": "Paratyphoid fever a",
+    "pasien_keluar_hidup_menurut_jeniskelamin_lk": 11,
+    "pasien_keluar_hidup_menurut_jeniskelamin_pr": 20,
+    "pasien_keluar_mati_menurut_jeniskelamin_lk": 20,
+    "pasien_keluar_mati_menurut_jeniskelamin_pr": 10
+}
