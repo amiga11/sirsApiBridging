@@ -303,8 +303,8 @@ router.post("/apisirs/users/bridging", verifyToken, insertDataUserBridging);
 router.patch("/apisirs/users/:id/admin", verifyToken, changePassword);
 
 // Token
-router.post("/apisirs/login", login);
-router.post("/apisirs/loginBridging", loginUserBridging);
+router.post("/apisirs/login/lama", login);
+router.post("/apisirs/login", loginUserBridging);
 router.delete("/apisirs/logout", logout);
 router.get("/apisirs/token", refreshToken);
 
