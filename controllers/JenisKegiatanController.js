@@ -1,84 +1,112 @@
-import { jenisKegiatan } from '../models/JenisKegiatan.js'
+import { jenisKegiatan } from "../models/JenisKegiatan.js";
 import { Op } from "sequelize";
-import { jenisGroupKegiatanHeader } from '../models/RLTigaTitikTujuh.js'
+import { jenisGroupKegiatanHeader } from "../models/RLTigaTitikTujuh.js";
 export const getDataJenisKegiatan = (req, res) => {
-    jenisKegiatan.findAll({
-        attributes: ['id','no','nama'],
-        where: {
-            rl_id: req.query.rlid
-        }
+  jenisKegiatan
+    .findAll({
+      attributes: ["id", "no", "nama"],
+      where: {
+        rl_id: req.query.rlid,
+      },
     })
     .then((results) => {
-        res.status(200).send({
-            status: true,
-            message: "data found",
-            data: results
-        })
+      res.status(200).send({
+        status: true,
+        message: "data found",
+        data: results,
+      });
     })
     .catch((err) => {
-        res.status(422).send({
-            status: false,
-            message: err
-        })
-        return
+      res.status(422).send({
+        status: false,
+        message: err,
+      });
+      return;
+    });
+};
+
+export const getDataJenisKegiatanRl35 = (req, res) => {
+  jenisKegiatan
+    .findAll({
+      attributes: ["id", "no", "nama"],
+      where: {
+        rl_id: 5,
+        group_jenis_kegiatan_id: {
+          [Op.not]: null,
+        },
+      },
     })
-}
+    .then((results) => {
+      res.status(200).send({
+        status: true,
+        message: "data found",
+        data: results,
+      });
+    })
+    .catch((err) => {
+      res.status(422).send({
+        status: false,
+        message: err,
+      });
+      return;
+    });
+};
 
 export const getDataGroupJenisKegiatan = (req, res) => {
-  jenisKegiatan.findAll({
-      attributes: ['id', 'no', 'nama'],
+  jenisKegiatan
+    .findAll({
+      attributes: ["id", "no", "nama"],
       where: {
-          rl_id: req.query.rlid
+        rl_id: req.query.rlid,
       },
       include: {
-          model: jenisGroupKegiatanHeader,
-          
-          
-          required: false
-      }
-  })
-  .then((results) => {
+        model: jenisGroupKegiatanHeader,
+
+        required: false,
+      },
+    })
+    .then((results) => {
       res.status(200).send({
-          status: true,
-          message: "data found",
-          data: results
-      })
-  })
-  .catch((err) => {
+        status: true,
+        message: "data found",
+        data: results,
+      });
+    })
+    .catch((err) => {
       res.status(422).send({
-          status: false,
-          message: err
-      })
-      return
-  })
-}
+        status: false,
+        message: err,
+      });
+      return;
+    });
+};
 
 export const getDataJenisKegiatanLab = (req, res) => {
-    jenisKegiatan
-      .findAll({
-        attributes: ["id", "no", "nama"],
-        where: {
-          rl_id: req.query.rlid,
-          id: {
-            [Op.notIn]: [
-              15, 16, 25, 32, 36, 41, 64, 73, 74, 96, 102, 112, 129, 151, 158,
-              168, 201,
-            ],
-          },
+  jenisKegiatan
+    .findAll({
+      attributes: ["id", "no", "nama"],
+      where: {
+        rl_id: req.query.rlid,
+        id: {
+          [Op.notIn]: [
+            15, 16, 25, 32, 36, 41, 64, 73, 74, 96, 102, 112, 129, 151, 158,
+            168, 201,
+          ],
         },
-      })
-      .then((results) => {
-        res.status(200).send({
-          status: true,
-          message: "data found",
-          data: results,
-        });
-      })
-      .catch((err) => {
-        res.status(422).send({
-          status: false,
-          message: err,
-        });
-        return;
+      },
+    })
+    .then((results) => {
+      res.status(200).send({
+        status: true,
+        message: "data found",
+        data: results,
       });
-  };
+    })
+    .catch((err) => {
+      res.status(422).send({
+        status: false,
+        message: err,
+      });
+      return;
+    });
+};

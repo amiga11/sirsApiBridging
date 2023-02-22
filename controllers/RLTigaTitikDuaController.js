@@ -7,20 +7,28 @@ import {
 import Joi from "joi";
 
 export const getDataRLTigaTitikDua = (req, res) => {
-  rlTigaTitikDuaHeader
+  rlTigaTitikDuaDetail
     .findAll({
-      attributes: ["id", "tahun"],
+      attributes: [
+        "id",
+        "tahun",
+        "total_pasien_rujukan",
+        "total_pasien_non_rujukan",
+        "tindak_lanjut_pelayanan_dirawat",
+        "tindak_lanjut_pelayanan_dirujuk",
+        "tindak_lanjut_pelayanan_pulang",
+        "mati_di_ugd",
+        "doa",
+      ],
       where: {
         rs_id: req.user.rsId,
         tahun: req.query.tahun,
       },
       include: {
-        model: rlTigaTitikDuaDetail,
-        include: {
-          model: jenisPelayanan,
-        },
+        model: jenisPelayanan,
+        attributes: ["id", "nama"],
       },
-      order: [[{ model: rlTigaTitikDuaDetail }, "jenis_pelayanan_id", "ASC"]],
+      order: [["jenis_pelayanan_id", "ASC"]],
     })
     .then((results) => {
       res.status(200).send({
@@ -39,7 +47,7 @@ export const getDataRLTigaTitikDua = (req, res) => {
 };
 
 export const insertDataRLTigaTitikDua = async (req, res) => {
-    //console.log(req.body)
+  //console.log(req.body)
   const schema = Joi.object({
     tahun: Joi.number().required(),
     data: Joi.array()
@@ -240,43 +248,41 @@ export const getRLTigaTitikDuaById = async (req, res) => {
 };
 
 export const updateDataRLTigaTitikDua = async (req, res) => {
-    
-    try {
-    
+  try {
     const data = req.body;
     let total = data.totalPasienNonRujukan + data.totalPasienNonRujukan;
     let totaltindakan =
-    data.tindakLanjutPelayananDirawat +
-    data.tindakLanjutPelayananDirujuk +
-    data.matiDiUGD +
-    data.doa;
+      data.tindakLanjutPelayananDirawat +
+      data.tindakLanjutPelayananDirujuk +
+      data.matiDiUGD +
+      data.doa;
     let jumlahPelayananPulang = total - totaltindakan;
     const dataUPdate = {
-        total_pasien_rujukan: data.totalPasienRujukan,
-        total_pasien_non_rujukan: data.totalPasienNonRujukan,
-        tindak_lanjut_pelayanan_dirawat: data.tindakLanjutPelayananDirawat,
-        tindak_lanjut_pelayanan_dirujuk: data.tindakLanjutPelayananDirujuk,
-        tindak_lanjut_pelayanan_pulang: jumlahPelayananPulang,
-        mati_di_ugd: data.matiDiUGD,
-        doa: data.doa,
+      total_pasien_rujukan: data.totalPasienRujukan,
+      total_pasien_non_rujukan: data.totalPasienNonRujukan,
+      tindak_lanjut_pelayanan_dirawat: data.tindakLanjutPelayananDirawat,
+      tindak_lanjut_pelayanan_dirujuk: data.tindakLanjutPelayananDirujuk,
+      tindak_lanjut_pelayanan_pulang: jumlahPelayananPulang,
+      mati_di_ugd: data.matiDiUGD,
+      doa: data.doa,
     };
-    
-      if (total >= totaltindakan) {
-        const update = await rlTigaTitikDuaDetail.update(dataUPdate, {
-          where: {
-            id: req.params.id,
-          },
-        });
-        res.status(201).send({
-          status: true,
-          message: "Data Diperbaharui",
-        });
-      } else {
-        res.status(400).send({
-          status: false,
-          message: "Jumlah Tindak Lanjut Pelayanan Pulang Tidak Sesuai",
-        });
-      }
+
+    if (total >= totaltindakan) {
+      const update = await rlTigaTitikDuaDetail.update(dataUPdate, {
+        where: {
+          id: req.params.id,
+        },
+      });
+      res.status(201).send({
+        status: true,
+        message: "Data Diperbaharui",
+      });
+    } else {
+      res.status(400).send({
+        status: false,
+        message: "Jumlah Tindak Lanjut Pelayanan Pulang Tidak Sesuai",
+      });
+    }
   } catch (error) {
     console.log(error.message);
     res.status(400).send({

@@ -7,22 +7,23 @@ import {
 import Joi from "joi";
 
 export const getDataRLTigaTitikTigaBelasA = (req, res) => {
-  rlTigaTitikTigaBelasA
+  rlTigaTitikTigaBelasADetail
     .findAll({
-      attributes: ["id", "tahun"],
+      attributes: [
+        "id",
+        "tahun",
+        "jumlah_item_obat",
+        "jumlah_item_obat_rs",
+        "jumlah_item_obat_formulatorium",
+      ],
       where: {
         rs_id: req.user.rsId,
         tahun: req.query.tahun,
       },
       include: {
-        model: rlTigaTitikTigaBelasADetail,
-        include: {
-          model: golonganObat,
-        },
+        model: golonganObat,
       },
-      order: [
-        [{ model: rlTigaTitikTigaBelasADetail }, "golongan_obat_id", "ASC"],
-      ],
+      order: [["golongan_obat_id", "ASC"]],
     })
     .then((results) => {
       res.status(200).send({

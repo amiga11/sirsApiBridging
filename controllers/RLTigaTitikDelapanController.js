@@ -45,7 +45,7 @@ export const getDataRLTigaTitikDelapan = (req, res) => {
 export const getDataRLTigaTitikDelapanDetailKegiatan = (req, res) => {
   rlTigaTitikDelapanDetail
     .findAll({
-      attributes: ["id", "rl_tiga_titik_delapan_id", "jumlah"],
+      attributes: ["id", "tahun", "jumlah"],
       where: {
         rs_id: req.user.rsId,
         tahun: req.query.tahun,
@@ -53,15 +53,8 @@ export const getDataRLTigaTitikDelapanDetailKegiatan = (req, res) => {
       include: {
         model: jenisKegiatan,
         attributes: ["id", "no", "nama"],
-        include: {
-          model: groupJenisKegiatan,
-          attributes: ["id", "no", "nama"],
-          include: {
-            model: groupJenisKegiatanHeader,
-          },
-        },
+        order: [[jenisKegiatan, "no", "ASC"]],
       },
-      order: [[jenisKegiatan, "id", "ASC"]],
     })
     .then((results) => {
       res.status(200).send({

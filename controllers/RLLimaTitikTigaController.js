@@ -7,19 +7,25 @@ import {
 import Joi from "joi";
 
 export const getDataRLLimaTitikTiga = (req, res) => {
-  rlLimaTitikTiga
+  rlLimaTitikTigaDetail
     .findAll({
-      attributes: ["id", "tahun"],
+      attributes: [
+        "id",
+        "tahun",
+        "kode_icd_10",
+        "deskripsi",
+        "pasien_keluar_hidup_menurut_jeniskelamin_lk",
+        "pasien_keluar_hidup_menurut_jeniskelamin_pr",
+        "pasien_keluar_mati_menurut_jeniskelamin_lk",
+        "pasien_keluar_mati_menurut_jeniskelamin_pr",
+      ],
 
       where: {
         rs_id: req.user.rsId,
         tahun: req.query.tahun,
       },
       include: {
-        model: rlLimaTitikTigaDetail,
-        include: {
-          model: noUrut,
-        },
+        model: noUrut,
       },
       subQuery: false,
       limit: 10,

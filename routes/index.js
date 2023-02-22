@@ -16,11 +16,15 @@ import { refreshToken } from "../controllers/RefreshToken.js";
 // References
 import { getDataRumahSakit } from "../controllers/RumahSakitController.js";
 import { getDataJenisPelayanan } from "../controllers/JenisPelayananController.js";
-import { getDataCaraPembayaran } from "../controllers/CaraPembayaranController.js";
+import {
+  getDataCaraPembayaran,
+  getDataCaraPembayaranInput,
+} from "../controllers/CaraPembayaranController.js";
 import { getDataJenisSpesialis } from "../controllers/JenisSpesialisController.js";
 import {
   getDataJenisKegiatan,
   getDataJenisKegiatanLab,
+  getDataJenisKegiatanRl35,
 } from "../controllers/JenisKegiatanController.js";
 import {
   getDataJenisTindakan,
@@ -312,10 +316,11 @@ router.get("/apisirs/token", refreshToken);
 router.get("/apisirs/jenispelayanan", verifyToken, getDataJenisPelayanan);
 
 // Cara Pembayaran
-router.get("/apisirs/carapembayaran", verifyToken, getDataCaraPembayaran);
+router.get("/apisirs/carapembayaran", verifyToken, getDataCaraPembayaranInput);
 
 // Jenis Kegiatan
 router.get("/apisirs/jeniskegiatan", verifyToken, getDataJenisKegiatan);
+router.get("/apisirs/jeniskegiatanrl35", verifyToken, getDataJenisKegiatanRl35);
 //Jenis Kegiatan Lab 3.8
 router.get("/apisirs/jeniskegiatanlab", verifyToken, getDataJenisKegiatanLab);
 

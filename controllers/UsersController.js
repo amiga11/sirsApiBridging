@@ -390,7 +390,7 @@ export const loginUserBridging = (req, res) => {
         });
         return;
       }
-      console.log(results);
+      //   console.log(results);
       if (results[0].is_bridging === 1) {
         bcrypt.compare(
           req.body.password,
