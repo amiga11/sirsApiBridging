@@ -315,39 +315,50 @@ export const insertDataUserBridging = async (req, res) => {
     return;
   }
   let dataRegis = {};
-  try {
-    const saltRound = 10;
-    const plainPassword = req.body.password;
+
+  const saltRound = 10;
+  const plainPassword = req.body.password;
+  const hashpw = new Promise((resolve, reject) => {
     bcrypt.hash(plainPassword, saltRound, (err, hash) => {
       if (err) {
-        res.status(422).send({
-          status: false,
-          message: err,
-        });
-        return;
+        reject(err);
+      } else {
+        resolve(hash);
       }
-      dataRegis = {
-        nama: req.body.nama,
-        email: req.body.email,
-        no_telepon: req.body.noTelepon,
-        password: hash,
-        rs_id: req.user.rsId,
-        is_bridging: 1,
-      };
-      users.create({
-        nama: req.body.nama,
-        email: req.body.email,
-        no_telepon: req.body.noTelepon,
-        password: hash,
-        rs_id: req.user.rsId,
-        jenis_user_id: 4,
-        is_bridging: 1,
-      });
-      res.status(200).json({ message: "User Bridging Berhasil di Buat" });
     });
-  } catch (error) {
-    console.log(error.message);
-  }
+  });
+  hashpw
+    .then((hashed) => {
+      users
+        .create({
+          nama: req.body.nama,
+          email: req.body.email,
+          no_telepon: req.body.noTelepon,
+          password: hashed,
+          rs_id: req.user.rsId,
+          jenis_user_id: 4,
+          is_bridging: 1,
+        })
+        .then(function (response) {
+          res.status(200).json({ message: "User Bridging Berhasil di Buat" });
+        })
+        .catch(function (err) {
+          if (err.name === "SequelizeUniqueConstraintError") {
+            res.status(400).send({
+              status: false,
+              message: "Email Sudah Terdaftar",
+            });
+          } else {
+            res.status(400).send({
+              status: false,
+              message: "error",
+            });
+          }
+        });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 export const loginUserBridging = (req, res) => {
