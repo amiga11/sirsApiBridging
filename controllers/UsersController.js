@@ -314,7 +314,6 @@ export const insertDataUserBridging = async (req, res) => {
     });
     return;
   }
-  let dataRegis = {};
 
   const saltRound = 10;
   const plainPassword = req.body.password;
@@ -339,7 +338,7 @@ export const insertDataUserBridging = async (req, res) => {
           jenis_user_id: 4,
           is_bridging: 1,
         })
-        .then(function (response) {
+        .then(function () {
           res.status(200).json({ message: "User Bridging Berhasil di Buat" });
         })
         .catch(function (err) {
