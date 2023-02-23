@@ -20,11 +20,11 @@ Content-Type: application/json
 ### Insert New User Bridging
 POST http://localhost:5000/apisirs/users/bridging
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDQsIm5hbWEiOiJSUyBVbXVtIERhZXJhaCBLYWJ1cGF0ZW4gQWNlaCBCZXNhciIsImVtYWlsIjoiMTEwODAxNSIsInJzSWQiOiIxMTA4MDE1IiwiaWF0IjoxNjc2ODYxMzU0LCJleHAiOjE2NzY4NjE0MTR9.ZMTbDySCyt6_cNr_UCCUQW8d4abSliBCpiBAZfDEE5g
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAzNiwibmFtYSI6InVkaW4iLCJlbWFpbCI6InVkaW5nYW50ZW5nQGdtYWlsLmNvbSIsInJzSWQiOiIxMTEwMDc1IiwiaWF0IjoxNjc3MTE2NTYwLCJleHAiOjE2NzcxMjAxNjB9.21714qO6O2XbRYv59SKsHbtrJzad1zwW3FUXGdISe2A
 
 {
     "nama": "udin",
-    "email": "udinganteng@gmail.com",
+    "email": "udinganteng2@gmail.com",
     "password": "12345",
     "noTelepon": "021222999"
 }
@@ -50,7 +50,7 @@ Content-Type: application/json
 }
 
 ### Login Bridging
-POST http://localhost:5000/apisirs/login
+POST http://localhost:5000/apisirs6ext/login
 Content-Type: application/json
 
 {
