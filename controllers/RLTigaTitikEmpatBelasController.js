@@ -48,23 +48,46 @@ export const getDataRLTigaTitikEmpatBelas = (req, res) => {
 };
 
 export const insertDataRLTigaTitikEmpatBelas = async (req, res) => {
+  const currentYear = new Date().getFullYear();
   const schema = Joi.object({
-    tahun: Joi.number().required(),
+    tahun: Joi.number()
+      .min(currentYear - 1)
+      .required(),
     data: Joi.array()
       .items(
         Joi.object()
           .keys({
             jenisSpesialisId: Joi.number().required(),
-            rujukanDiterimaDariPuskesmas: Joi.number().required(),
-            rujukanDiterimaDariFasilitasKesehatanLain: Joi.number().required(),
-            rujukanDiterimaDariRsLain: Joi.number().required(),
-            rujukanDikembalikanKePuskesmas: Joi.number().required(),
-            rujukanDikembalikanKeFasilitasKesehatanLain:
-              Joi.number().required(),
-            rujukanDikembalikanKeRsAsal: Joi.number().required(),
-            dirujukanPasienRujukan: Joi.number().required(),
-            dirujukPasienDatangSendiri: Joi.number().required(),
-            dirujukDiterimaKembali: Joi.number().required(),
+            rujukanDiterimaDariPuskesmas: Joi.number()
+              .min(0)
+              .max(9999999)
+              .required(),
+            rujukanDiterimaDariFasilitasKesehatanLain: Joi.number()
+              .min(0)
+              .max(9999999)
+              .required(),
+            rujukanDiterimaDariRsLain: Joi.number()
+              .min(0)
+              .max(9999999)
+              .required(),
+            rujukanDikembalikanKePuskesmas: Joi.number()
+              .min(0)
+              .max(9999999)
+              .required(),
+            rujukanDikembalikanKeFasilitasKesehatanLain: Joi.number()
+              .min(0)
+              .max(9999999)
+              .required(),
+            rujukanDikembalikanKeRsAsal: Joi.number()
+              .min(0)
+              .max(9999999)
+              .required(),
+            dirujukanPasienRujukan: Joi.number().min(0).max(9999999).required(),
+            dirujukPasienDatangSendiri: Joi.number()
+              .min(0)
+              .max(9999999)
+              .required(),
+            dirujukDiterimaKembali: Joi.number().min(0).max(9999999).required(),
           })
           .required()
       )
@@ -79,10 +102,11 @@ export const insertDataRLTigaTitikEmpatBelas = async (req, res) => {
     });
     return;
   }
-  // console.log(req.user);
-  let transaction;
+  const transaction = await databaseSIRS.transaction();
+
+  let jenSp = [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
+
   try {
-    transaction = await databaseSIRS.transaction();
     const resultInsertHeader = await rlTigaTitikEmpatBelasHeader.create(
       {
         rs_id: req.user.rsId,
@@ -90,11 +114,15 @@ export const insertDataRLTigaTitikEmpatBelas = async (req, res) => {
         user_id: req.user.id,
       },
       {
-        transaction,
+        transaction: transaction,
       }
     );
 
     const dataDetail = req.body.data.map((value, index) => {
+      if (jenSp.includes(value.jenisSpesialisId) == false) {
+        console.log("Jenis Spesialis Salah");
+        throw new SyntaxError("0");
+      }
       return {
         rs_id: req.user.rsId,
         tahun: req.body.tahun,
@@ -118,18 +146,7 @@ export const insertDataRLTigaTitikEmpatBelas = async (req, res) => {
     const resultInsertDetail = await rlTigaTitikEmpatBelasDetail.bulkCreate(
       dataDetail,
       {
-        transaction,
-        updateOnDuplicate: [
-          "rujukan_diterima_dari_puskesmas",
-          "rujukan_diterima_dari_fasilitas_kesehatan_lain",
-          "rujukan_diterima_dari_rs_lain",
-          "rujukan_dikembalikan_ke_puskesmas",
-          "rujukan_dikembalikan_ke_fasilitas_kesehatan_lain",
-          "rujukan_dikembalikan_ke_rs_asal",
-          "dirujukan_pasien_rujukan",
-          "dirujuk_pasien_datang_sendiri",
-          "dirujuk_diterima_kembali",
-        ],
+        transaction: transaction,
       }
     );
 
@@ -137,14 +154,26 @@ export const insertDataRLTigaTitikEmpatBelas = async (req, res) => {
     res.status(201).send({
       status: true,
       message: "data created",
-      data: {
-        id: resultInsertHeader.id,
-      },
     });
   } catch (error) {
-    console.log(error);
-    if (transaction) {
-      await transaction.rollback();
+    console.log(error.code);
+    await transaction.rollback();
+    if (error.message == "0") {
+      res.status(400).send({
+        status: false,
+        message: "data not created",
+        error: "Jenis Spesialis Salah",
+      });
+    } else if (error.name === "SequelizeUniqueConstraintError") {
+      res.status(400).send({
+        status: false,
+        message: "Duplicate Entry",
+      });
+    } else {
+      res.status(400).send({
+        status: false,
+        message: "error",
+      });
     }
   }
 };
@@ -154,6 +183,7 @@ export const deleteDataRLTigaTitikEmpatBelas = async (req, res) => {
     const count = await rlTigaTitikEmpatBelasDetail.destroy({
       where: {
         id: req.params.id,
+        rs_id: req.user.rsId,
       },
     });
     res.status(201).send({
@@ -214,24 +244,45 @@ export const getDataRLTigaTitikEmpatBelasDetail = (req, res) => {
 };
 
 export const updateDataRLTigaTitikEmpatBelas = async (req, res) => {
+  const schema = Joi.object({
+    rujukanDiterimaDariPuskesmas: Joi.number().min(0).max(9999999).required(),
+    rujukanDiterimaDariFasilitasKesehatanLain: Joi.number()
+      .min(0)
+      .max(9999999)
+      .required(),
+    rujukanDiterimaDariRsLain: Joi.number().min(0).max(9999999).required(),
+    rujukanDikembalikanKePuskesmas: Joi.number().min(0).max(9999999).required(),
+    rujukanDikembalikanKeFasilitasKesehatanLain: Joi.number()
+      .min(0)
+      .max(9999999)
+      .required(),
+    rujukanDikembalikanKeRsAsal: Joi.number().min(0).max(9999999).required(),
+    dirujukanPasienRujukan: Joi.number().min(0).max(9999999).required(),
+    dirujukPasienDatangSendiri: Joi.number().min(0).max(9999999).required(),
+    dirujukDiterimaKembali: Joi.number().min(0).max(9999999).required(),
+  }).required();
+  const { error, value } = schema.validate(req.body);
+  if (error) {
+    res.status(404).send({
+      status: false,
+      message: error.details[0].message,
+    });
+    return;
+  }
   try {
-    const data = req.body;
-    try {
-      const update = await rlTigaTitikEmpatBelasDetail.update(data, {
-        where: {
-          id: req.params.id,
-        },
-      });
-      res.status(201).send({
-        status: true,
-        message: "Data Diperbaharui",
-      });
-    } catch (error) {
-      res.status(400).send({
-        status: false,
-        message: "Gagal Memperbaharui Data",
-      });
-    }
+    let upd = await rlTigaTitikEmpatBelasDetail.update(req.body, {
+      where: {
+        id: req.params.id,
+        rs_id: req.user.rsId,
+      },
+    });
+    res.status(200).json({
+      status: true,
+      message: "data update successfully",
+      data: {
+        updated_row: upd,
+      },
+    });
   } catch (error) {
     console.log(error.message);
     res.status(400).send({

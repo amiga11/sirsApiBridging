@@ -91,15 +91,37 @@ export const getRLTigaTitikTujuhById = async (req, res) => {
 };
 
 export const updateDataRLTigaTitikTujuh = async (req, res) => {
+  const schema = Joi.object({
+    jumlah: Joi.number().min(0).max(9999999).required(),
+  }).required();
+  const { error, value } = schema.validate(req.body);
+  if (error) {
+    res.status(404).send({
+      status: false,
+      message: error.details[0].message,
+    });
+    return;
+  }
   try {
-    await rlTigaTitikTujuhDetail.update(req.body, {
+    let upd = await rlTigaTitikTujuhDetail.update(req.body, {
       where: {
         id: req.params.id,
+        rs_id: req.user.rsId,
       },
     });
-    res.status(200).json({ message: "RL Updated" });
+    res.status(200).json({
+      status: true,
+      message: "data update successfully",
+      data: {
+        updated_row: upd,
+      },
+    });
   } catch (error) {
     console.log(error.message);
+    res.status(400).send({
+      status: false,
+      message: "Gagal Memperbaharui Data",
+    });
   }
 };
 
@@ -108,28 +130,42 @@ export const deleteDataRLTigaTitikTujuh = async (req, res) => {
     await rlTigaTitikTujuhDetail.destroy({
       where: {
         id: req.params.id,
+        rs_id: req.user.rsId,
       },
     });
 
-    res.status(200).json({ message: "RL Deleted" });
+    res.status(200).json({
+      status: true,
+      message: "data deleted successfully",
+      data: {
+        deleted_rows: count,
+      },
+    });
   } catch (error) {
     console.log(error.message);
+    res.status(404).send({
+      status: false,
+      message: error,
+    });
   }
 };
 
 export const insertDataRLTigaTitikTujuh = async (req, res) => {
+  const currentYear = new Date().getFullYear();
   const schema = Joi.object({
-    tahun: Joi.number().required(),
+    tahun: Joi.number()
+      .min(currentYear - 1)
+      .required(),
     data: Joi.array()
       .items(
         Joi.object().keys({
-          jenisKegiatanId: Joi.number(),
-          jumlah: Joi.number().min(0),
+          jenisKegiatanId: Joi.number().min(0).max(9999999).required(),
+          jumlah: Joi.number().min(0).max(9999999).required(),
         })
       )
       .required(),
   });
-  //console.log(req);
+
   const { error, value } = schema.validate(req.body);
   if (error) {
     res.status(404).send({
@@ -139,19 +175,27 @@ export const insertDataRLTigaTitikTujuh = async (req, res) => {
     return;
   }
 
-  let transaction;
+  let jenKeg = [
+    338, 339, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352,
+    353, 354, 405,
+  ];
+
+  const transaction = await databaseSIRS.transaction();
   try {
-    transaction = await databaseSIRS.transaction();
     const resultInsertHeader = await rlTigaTitikTujuh.create(
       {
         rs_id: req.user.rsId,
         tahun: req.body.tahun,
         user_id: req.user.id,
       },
-      { transaction }
+      { transaction: transaction }
     );
 
     const dataDetail = req.body.data.map((value, index) => {
+      if (jenKeg.includes(value.jenisKegiatanId) == false) {
+        console.log("Jenis Kegiatan Salah");
+        throw new SyntaxError("0");
+      }
       return {
         rl_tiga_titik_tujuh_id: resultInsertHeader.id,
         jenis_kegiatan_id: value.jenisKegiatanId,
@@ -166,8 +210,7 @@ export const insertDataRLTigaTitikTujuh = async (req, res) => {
       dataDetail,
 
       {
-        transaction,
-        updateOnDuplicate: ["jumlah"],
+        transaction: transaction,
       }
     );
 
@@ -175,26 +218,26 @@ export const insertDataRLTigaTitikTujuh = async (req, res) => {
     res.status(201).send({
       status: true,
       message: "data created",
-      data: {
-        id: resultInsertHeader.id,
-      },
     });
   } catch (error) {
     console.log(error.code);
-    if (transaction) {
-      await transaction.rollback();
-      if (error.name === "SequelizeUniqueConstraintError") {
-        res.status(400).send({
-          status: false,
-          message: "Fail Duplicate Entry",
-          // reason: 'Duplicate Entry'
-        });
-      } else {
-        res.status(400).send({
-          status: false,
-          message: "error",
-        });
-      }
+    await transaction.rollback();
+    if (error.message == "0") {
+      res.status(400).send({
+        status: false,
+        message: "data not created",
+        error: "Jenis Kegiatan Salah",
+      });
+    } else if (error.name === "SequelizeUniqueConstraintError") {
+      res.status(400).send({
+        status: false,
+        message: "Duplicate Entry",
+      });
+    } else {
+      res.status(400).send({
+        status: false,
+        message: "error",
+      });
     }
   }
 };

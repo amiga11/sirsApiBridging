@@ -102,13 +102,33 @@ export const getRLTigaTitikTigaBelasAById = async (req, res) => {
 };
 
 export const updateDataRLTigaTitikTigaBelasA = async (req, res) => {
+  const schema = Joi.object({
+    jumlahItemObat: Joi.number().min(0).max(9999999).required(),
+    jumlahItemObatRs: Joi.number().min(0).max(9999999).required(),
+    jumlahItemObatFormulatorium: Joi.number().min(0).max(9999999).required(),
+  }).required();
+  const { error, value } = schema.validate(req.body);
+  if (error) {
+    res.status(404).send({
+      status: false,
+      message: error.details[0].message,
+    });
+    return;
+  }
   try {
-    await rlTigaTitikTigaBelasADetail.update(req.body, {
+    const upDat = await rlTigaTitikTigaBelasADetail.update(req.body, {
       where: {
         id: req.params.id,
+        rs_id: req.user.rsId,
       },
     });
-    res.status(200).json({ message: "RL Updated" });
+    res.status(200).json({
+      status: true,
+      message: "data update successfully",
+      data: {
+        updated_row: upDat,
+      },
+    });
   } catch (error) {
     console.log(error.message);
   }
@@ -116,28 +136,41 @@ export const updateDataRLTigaTitikTigaBelasA = async (req, res) => {
 
 export const deleteDataRLTigaTitikTigaBelasA = async (req, res) => {
   try {
-    await rlTigaTitikTigaBelasADetail.destroy({
+    const count = await rlTigaTitikTigaBelasADetail.destroy({
       where: {
         id: req.params.id,
+        rs_id: req.user.rsId,
       },
     });
 
-    res.status(200).json({ message: "RL Deleted" });
+    res.status(200).json({
+      status: true,
+      message: "data deleted successfully",
+      data: {
+        deleted_rows: count,
+      },
+    });
   } catch (error) {
     console.log(error.message);
   }
 };
 
 export const insertDataRLTigaTitikTigaBelasA = async (req, res) => {
+  const currentYear = new Date().getFullYear();
   const schema = Joi.object({
-    tahun: Joi.number().required(),
+    tahun: Joi.number()
+      .min(currentYear - 1)
+      .required(),
     data: Joi.array()
       .items(
         Joi.object().keys({
-          golonganObatId: Joi.number(),
-          jumlahItemObat: Joi.number().min(0),
-          jumlahItemObatRs: Joi.number().min(0),
-          jumlahItemObatFormulatorium: Joi.number().min(0),
+          golonganObatId: Joi.number().min(1).max(3).required(),
+          jumlahItemObat: Joi.number().min(0).max(9999999).required(),
+          jumlahItemObatRs: Joi.number().min(0).max(9999999).required(),
+          jumlahItemObatFormulatorium: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
         })
       )
       .required(),
@@ -180,7 +213,6 @@ export const insertDataRLTigaTitikTigaBelasA = async (req, res) => {
       dataDetail,
       {
         transaction: transaction,
-        // updateOnDuplicate: ['rawat_jalan','igd','rawat_inap']
       }
     );
 
@@ -188,9 +220,6 @@ export const insertDataRLTigaTitikTigaBelasA = async (req, res) => {
     res.status(201).send({
       status: true,
       message: "data created",
-      data: {
-        id: resultInsertHeader.id,
-      },
     });
   } catch (error) {
     console.log(error);

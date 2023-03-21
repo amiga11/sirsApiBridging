@@ -94,29 +94,48 @@ export const getrlTigaTitikSepuluhById = async (req, res) => {
 };
 
 export const updateDatarlTigaTitikSepuluh = async (req, res) => {
+  const schema = Joi.object({
+    jumlah: Joi.number().min(0).max(9999999).required(),
+  }).required();
+  const { error, value } = schema.validate(req.body);
+  if (error) {
+    res.status(404).send({
+      status: false,
+      message: error.details[0].message,
+    });
+    return;
+  }
   try {
-    await rlTigaTitikSepuluhDetail.update(req.body, {
+    const upDat = await rlTigaTitikSepuluhDetail.update(req.body, {
       where: {
         id: req.params.id,
+        rs_id: req.user.rsId,
       },
     });
-    res
-      .status(200)
-      .json({ message: "Rekapitulasi Laporan Telah Diperbaharui" });
+    res.status(200).json({
+      status: true,
+      message: "data update successfully",
+      data: {
+        updated_row: upDat,
+      },
+    });
   } catch (error) {
     console.log(error.message);
   }
 };
 
 export const insertDataRLTigaTitikSepuluh = async (req, res) => {
+  const currentYear = new Date().getFullYear();
   const schema = Joi.object({
-    tahun: Joi.number().required(),
+    tahun: Joi.number()
+      .min(currentYear - 1)
+      .required(),
     data: Joi.array()
       .items(
         Joi.object()
           .keys({
             jenisKegiatanId: Joi.number().required(),
-            jumlah: Joi.number().required(),
+            jumlah: Joi.number().min(0).max(9999999).required(),
           })
           .required()
       )
@@ -132,9 +151,12 @@ export const insertDataRLTigaTitikSepuluh = async (req, res) => {
     return;
   }
 
-  let transaction;
+  let jenKeg = [
+    388, 389, 390, 391, 392, 393, 394, 395, 396, 397, 398, 399, 400, 401, 407,
+  ];
+
+  const transaction = await databaseSIRS.transaction();
   try {
-    transaction = await databaseSIRS.transaction();
     const resultInsertHeader = await rlTigaTitikSepuluhHeader.create(
       {
         rs_id: req.user.rsId,
@@ -142,11 +164,15 @@ export const insertDataRLTigaTitikSepuluh = async (req, res) => {
         user_id: req.user.id,
       },
       {
-        transaction,
+        transaction: transaction,
       }
     );
 
     const dataDetail = req.body.data.map((value, index) => {
+      if (jenKeg.includes(value.jenisKegiatanId) == false) {
+        console.log("Jenis Kegiatan Salah");
+        throw new SyntaxError("0");
+      }
       return {
         rs_id: req.user.rsId,
         tahun: req.body.tahun,
@@ -160,8 +186,7 @@ export const insertDataRLTigaTitikSepuluh = async (req, res) => {
     const resultInsertDetail = await rlTigaTitikSepuluhDetail.bulkCreate(
       dataDetail,
       {
-        transaction,
-        updateOnDuplicate: ["jumlah"],
+        transaction: transaction,
       }
     );
 
@@ -169,14 +194,28 @@ export const insertDataRLTigaTitikSepuluh = async (req, res) => {
     res.status(201).send({
       status: true,
       message: "data created",
-      data: {
-        id: resultInsertHeader.id,
-      },
     });
   } catch (error) {
     console.log(error);
-    if (transaction) {
-      await transaction.rollback();
+    await transaction.rollback();
+    if (error.message == "0") {
+      res.status(400).send({
+        status: false,
+        message: "data not created",
+        error: "Jenis Kegiatan Salah",
+      });
+    } else if (error.name === "SequelizeUniqueConstraintError") {
+      res.status(400).send({
+        status: false,
+        message: "Duplicate Entry",
+      });
+    } else {
+      console.log(error);
+      res.status(400).send({
+        status: false,
+        message: "data not created",
+        error: error,
+      });
     }
   }
 };

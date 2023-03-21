@@ -18,13 +18,13 @@ Content-Type: application/json
 }
 
 ### Insert New User Bridging
-POST http://localhost:5000/apisirs/users/bridging
+POST http://localhost:5000/apisirs6ext/users/bridging
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAzNiwibmFtYSI6InVkaW4iLCJlbWFpbCI6InVkaW5nYW50ZW5nQGdtYWlsLmNvbSIsInJzSWQiOiIxMTEwMDc1IiwiaWF0IjoxNjc3MTE2NTYwLCJleHAiOjE2NzcxMjAxNjB9.21714qO6O2XbRYv59SKsHbtrJzad1zwW3FUXGdISe2A
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAzNiwibmFtYSI6InVkaW4iLCJlbWFpbCI6InVkaW5nYW50ZW5nQGdtYWlsLmNvbSIsInJzSWQiOiIxMTEwMDc1IiwiaWF0IjoxNjc3NDcxMzY5LCJleHAiOjE2Nzc0NzQ5Njl9.0WsrunqMjwsfAt9e3eCqK8jqrLYk7bMCWSEkbpYe4Y0
 
 {
-    "nama": "udin",
-    "email": "udinganteng2@gmail.com",
+    "nama": "coba",
+    "email": "coba@gmail.com",
     "password": "12345",
     "noTelepon": "021222999"
 }
@@ -62,7 +62,7 @@ Content-Type: application/json
 DELETE http://sirs6.kemkes.go.id/apisirs/logout
 
 ### Get Token
-GET http://localhost:5000/apisirs/token
+GET http://localhost:5000/apisirs6ext/token
 
 ### Reference
 ##################################################

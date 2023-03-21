@@ -36,21 +36,38 @@ export const getDataRLLimaTitikSatu = (req, res) => {
 };
 
 export const insertDataRLLimaTitikSatu = async (req, res) => {
-  console.log(req.user);
+  const currentYear = new Date().getFullYear();
   const schema = Joi.object({
-    tahun: Joi.number().required(),
-    tahunDanBulan: Joi.date().required(),
+    tahun: Joi.number()
+      .min(currentYear - 1)
+      .required(),
+    bulan: Joi.number().min(1).max(12).required(),
     data: Joi.array()
       .items(
         Joi.object()
           .keys({
             jenisKegiatanId: Joi.number().required(),
-            jumlah: Joi.number().required(),
+            jumlah: Joi.number().min(0).max(9999999).required(),
           })
           .required()
       )
       .required(),
   });
+
+  const bulan = [
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "09",
+    "10",
+    "11",
+    "12",
+  ];
 
   const { error, value } = schema.validate(req.body);
   if (error) {
@@ -61,22 +78,31 @@ export const insertDataRLLimaTitikSatu = async (req, res) => {
     return;
   }
 
-  let transaction;
+  const transaction = await databaseSIRS.transaction();
+  let jenKeg = [356, 357, 410];
   try {
-    transaction = await databaseSIRS.transaction();
+    bulan.map((value, index) => {
+      if (req.body.bulan - 1 == index) {
+        req.body.bulan = req.body.tahun + "-" + value + "-01";
+      }
+    });
     const resultInsertHeader = await rlLimaTitikSatuHeader.create(
       {
         rs_id: req.user.rsId,
-        tahun: req.body.tahunDanBulan,
+        tahun: req.body.bulan,
         user_id: req.user.id,
       },
-      { transaction }
+      { transaction: transaction }
     );
 
     const dataDetail = req.body.data.map((value, index) => {
+      if (jenKeg.includes(value.jenisKegiatanId) == false) {
+        console.log("Jenis Kegiatan Id Salah");
+        throw new SyntaxError("0");
+      }
       return {
         rs_id: req.user.rsId,
-        tahun: req.body.tahunDanBulan,
+        tahun: req.body.bulan,
         rl_lima_titik_satu_id: resultInsertHeader.id,
         jenis_kegiatan_id: value.jenisKegiatanId,
         jumlah: value.jumlah,
@@ -87,40 +113,64 @@ export const insertDataRLLimaTitikSatu = async (req, res) => {
     const resultInsertDetail = await rlLimaTitikSatuDetail.bulkCreate(
       dataDetail,
       {
-        transaction,
-        updateOnDuplicate: ["jumlah"],
+        transaction: transaction,
       }
     );
-    // console.log(resultInsertDetail[0].id)
+    console.log(dataDetail);
     await transaction.commit();
     res.status(201).send({
       status: true,
       message: "data created",
-      data: {
-        id: resultInsertHeader.id,
-      },
     });
   } catch (error) {
     console.log(error);
-    if (transaction) {
-      await transaction.rollback();
+    await transaction.rollback();
+    if (error.message == "0") {
+      res.status(400).send({
+        status: false,
+        message: "data not created",
+        error: "Jenis Kegiatan Salah",
+      });
+    } else if (error.name === "SequelizeUniqueConstraintError") {
+      res.status(400).send({
+        status: false,
+        message: "Duplicate Entry",
+      });
+    } else {
+      res.status(400).send({
+        status: false,
+        message: error,
+      });
     }
-    res.status(400).send({
-      status: false,
-      message: "data not created",
-      error: error,
-    });
   }
 };
 
 export const updateDataRLLimaTitikSatu = async (req, res) => {
+  const schema = Joi.object({
+    jumlah: Joi.number().min(0).max(9999999).required(),
+  }).required();
+  const { error, value } = schema.validate(req.body);
+  if (error) {
+    res.status(404).send({
+      status: false,
+      message: error.details[0].message,
+    });
+    return;
+  }
   try {
-    await rlLimaTitikSatuDetail.update(req.body, {
+    const upDat = await rlLimaTitikSatuDetail.update(req.body, {
       where: {
         id: req.params.id,
+        rs_id: req.user.rsId,
       },
     });
-    res.status(200).json({ message: "RL Updated" });
+    res.status(200).json({
+      status: true,
+      message: "data update successfully",
+      data: {
+        updated_row: upDat,
+      },
+    });
   } catch (error) {
     console.log(error.message);
   }
@@ -131,6 +181,7 @@ export const deleteDataRLLimaTitikSatu = async (req, res) => {
     const count = await rlLimaTitikSatuDetail.destroy({
       where: {
         id: req.params.id,
+        rs_id: req.user.rsId,
       },
     });
     res.status(201).send({

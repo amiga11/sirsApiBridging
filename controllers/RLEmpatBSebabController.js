@@ -7,35 +7,36 @@ import {
 import joi from "joi";
 
 export const insertDataRLEmpatBSebab = async (req, res) => {
+  const currentYear = new Date().getFullYear();
   const schema = joi.object({
-    tahun: joi.number().required(),
+    tahun: joi
+      .number()
+      .min(currentYear - 1)
+      .required(),
     data: joi
       .array()
       .items(
         joi.object().keys({
           jenisGolSebabId: joi.number(),
-          jmlhPasKasusUmurSex0hr6hrL: joi.number().min(0),
-          jmlhPasKasusUmurSex0hr6hrP: joi.number().min(0),
-          jmlhPasKasusUmurSex6hr28hrL: joi.number().min(0),
-          jmlhPasKasusUmurSex6hr28hrP: joi.number().min(0),
-          jmlhPasKasusUmurSex28hr1thL: joi.number().min(0),
-          jmlhPasKasusUmurSex28hr1thP: joi.number().min(0),
-          jmlhPasKasusUmurSex1th4thL: joi.number().min(0),
-          jmlhPasKasusUmurSex1th4thP: joi.number().min(0),
-          jmlhPasKasusUmurSex4th14thL: joi.number().min(0),
-          jmlhPasKasusUmurSex4th14thP: joi.number().min(0),
-          jmlhPasKasusUmurSex14th24thL: joi.number().min(0),
-          jmlhPasKasusUmurSex14th24thP: joi.number().min(0),
-          jmlhPasKasusUmurSex24th44thL: joi.number().min(0),
-          jmlhPasKasusUmurSex24th44thP: joi.number().min(0),
-          jmlhPasKasusUmurSex44th64L: joi.number().min(0),
-          jmlhPasKasusUmurSex44th64P: joi.number().min(0),
-          jmlhPasKasusUmurSexLebih64L: joi.number().min(0),
-          jmlhPasKasusUmurSexLebih64P: joi.number().min(0),
-          kasusBaruL: joi.number().min(0),
-          kasusBaruP: joi.number().min(0),
-          jmlhKasusBaru: joi.number().min(0),
-          jmlhKunjungan: joi.number().min(0),
+          jmlhPasKasusUmurSex0hr6hrL: joi.number().min(0).max(9999999),
+          jmlhPasKasusUmurSex0hr6hrP: joi.number().min(0).max(9999999),
+          jmlhPasKasusUmurSex6hr28hrL: joi.number().min(0).max(9999999),
+          jmlhPasKasusUmurSex6hr28hrP: joi.number().min(0).max(9999999),
+          jmlhPasKasusUmurSex28hr1thL: joi.number().min(0).max(9999999),
+          jmlhPasKasusUmurSex28hr1thP: joi.number().min(0).max(9999999),
+          jmlhPasKasusUmurSex1th4thL: joi.number().min(0).max(9999999),
+          jmlhPasKasusUmurSex1th4thP: joi.number().min(0).max(9999999),
+          jmlhPasKasusUmurSex4th14thL: joi.number().min(0).max(9999999),
+          jmlhPasKasusUmurSex4th14thP: joi.number().min(0).max(9999999),
+          jmlhPasKasusUmurSex14th24thL: joi.number().min(0).max(9999999),
+          jmlhPasKasusUmurSex14th24thP: joi.number().min(0).max(9999999),
+          jmlhPasKasusUmurSex24th44thL: joi.number().min(0).max(9999999),
+          jmlhPasKasusUmurSex24th44thP: joi.number().min(0).max(9999999),
+          jmlhPasKasusUmurSex44th64L: joi.number().min(0).max(9999999),
+          jmlhPasKasusUmurSex44th64P: joi.number().min(0).max(9999999),
+          jmlhPasKasusUmurSexLebih64L: joi.number().min(0).max(9999999),
+          jmlhPasKasusUmurSexLebih64P: joi.number().min(0).max(9999999),
+          jmlhKunjungan: joi.number().min(0).max(9999999),
         })
       )
       .required(),
@@ -50,20 +51,26 @@ export const insertDataRLEmpatBSebab = async (req, res) => {
     return;
   }
 
-  let transaction;
-
+  const transaction = await databaseSIRS.transaction();
+  let jenGol = [
+    551, 552, 553, 554, 555, 556, 557, 558, 559, 560, 561, 562, 563, 564, 565,
+    566, 567, 568, 569, 570, 571, 572, 573, 574, 575, 576, 577, 578, 579, 580,
+  ];
   try {
-    transaction = await databaseSIRS.transaction();
     const resultInsertHeader = await rlEmpatBSebabHeader.create(
       {
         rs_id: req.user.rsId,
         tahun: req.body.tahun,
         user_id: req.user.id,
       },
-      { transaction }
+      { transaction: transaction }
     );
 
     const dataDetail = req.body.data.map((value, index) => {
+      if (jenGol.includes(value.jenisGolSebabId) == false) {
+        console.log("Jenis Golongan Sebab Penyakit Salah");
+        throw new SyntaxError("0");
+      }
       let jumlahL =
         value.jmlhPasKasusUmurSex0hr6hrL +
         value.jmlhPasKasusUmurSex6hr28hrL +
@@ -87,6 +94,13 @@ export const insertDataRLEmpatBSebab = async (req, res) => {
         value.jmlhPasKasusUmurSexLebih64P;
 
       let jumlahall = jumlahL + jumlahP;
+
+      if (jumlahall >= value.jmlhKunjungan) {
+        console.log(
+          "Jumlah Data Jumlah Kunjungan kurang dari jumlah kasus baru"
+        );
+        throw new SyntaxError("1");
+      }
 
       return {
         rl_empat_b_sebab_id: resultInsertHeader.id,
@@ -118,56 +132,42 @@ export const insertDataRLEmpatBSebab = async (req, res) => {
         user_id: req.user.id,
       };
     });
-
-    if (dataDetail[0].jumlah_kunjungan >= dataDetail[0].jumlah_kasus_baru) {
-      const resultInsertDetail = await rlEmpatBSebabDetail.bulkCreate(
-        dataDetail,
-        {
-          transaction,
-          updateOnDuplicate: [
-            "jmlh_pas_kasus_umur_sex_0_6hr_l",
-            "jmlh_pas_kasus_umur_sex_0_6hr_p",
-            "jmlh_pas_kasus_umur_sex_6_28hr_l",
-            "jmlh_pas_kasus_umur_sex_6_28hr_p",
-            "jmlh_pas_kasus_umur_sex_28hr_1th_l",
-            "jmlh_pas_kasus_umur_sex_28hr_1th_p",
-            "jmlh_pas_kasus_umur_sex_1_4th_l",
-            "jmlh_pas_kasus_umur_sex_1_4th_p",
-            "jmlh_pas_kasus_umur_sex_4_14th_l",
-            "jmlh_pas_kasus_umur_sex_4_14th_p",
-            "jmlh_pas_kasus_umur_sex_14_24th_l",
-            "jmlh_pas_kasus_umur_sex_14_24th_p",
-            "jmlh_pas_kasus_umur_sex_24_44th_l",
-            "jmlh_pas_kasus_umur_sex_24_44th_p",
-            "jmlh_pas_kasus_umur_sex_44_64th_l",
-            "jmlh_pas_kasus_umur_sex_44_64th_p",
-            "jmlh_pas_kasus_umur_sex_lebih_64th_l",
-            "jmlh_pas_kasus_umur_sex_lebih_64th_p",
-            "kasus_baru_l",
-            "kasus_baru_p",
-            "jumlah_kasus_baru",
-            "jumlah_kunjungan",
-          ],
-        }
-      );
-      await transaction.commit();
-      res.status(201).send({
-        status: true,
-        message: "Data Created",
-        data: {
-          id: resultInsertHeader.id,
-        },
+    const resultInsertDetail = await rlEmpatBSebabDetail.bulkCreate(
+      dataDetail,
+      {
+        transaction: transaction,
+      }
+    );
+    await transaction.commit();
+    res.status(201).send({
+      status: true,
+      message: "Data Created",
+    });
+  } catch (error) {
+    console.log(error);
+    await transaction.rollback();
+    if (error.message == "0") {
+      res.status(400).send({
+        status: false,
+        message: "data not created",
+        error: "Jenis Golongan Sebab Penyakit salah",
+      });
+    } else if (error.message == "1") {
+      res.status(400).send({
+        status: false,
+        message: "data not created",
+        error: "Terdapat Data Jumlah Kunjungan Kurang Dari Jumlah Kasus Baru",
+      });
+    } else if (error.name === "SequelizeUniqueConstraintError") {
+      res.status(400).send({
+        status: false,
+        message: "Duplicate Entry",
       });
     } else {
       res.status(400).send({
         status: false,
-        message: "Data Jumlah Kunjungan kurang dari jumlah kasus baru",
+        message: error,
       });
-    }
-  } catch (error) {
-    console.log(error);
-    if (transaction) {
-      await transaction.rollback();
     }
   }
 };
@@ -232,6 +232,7 @@ export const deleteDataRLEmpatBSebabId = async (req, res) => {
     await rlEmpatBSebabDetail.destroy({
       where: {
         id: req.params.id,
+        rs_id: req.user.rsId,
       },
     });
     res.status(201).send({
@@ -273,27 +274,25 @@ export const getDataRLEmpatBSebabId = async (req, res) => {
 export const updateDataRLEmpatSebabId = async (req, res) => {
   try {
     const schema = joi.object({
-      jmlhPasKasusUmurSex0hr6hrL: joi.number().min(0),
-      jmlhPasKasusUmurSex0hr6hrP: joi.number().min(0),
-      jmlhPasKasusUmurSex6hr28hrL: joi.number().min(0),
-      jmlhPasKasusUmurSex6hr28hrP: joi.number().min(0),
-      jmlhPasKasusUmurSex28hr1thL: joi.number().min(0),
-      jmlhPasKasusUmurSex28hr1thP: joi.number().min(0),
-      jmlhPasKasusUmurSex1th4thL: joi.number().min(0),
-      jmlhPasKasusUmurSex1th4thP: joi.number().min(0),
-      jmlhPasKasusUmurSex4th14thL: joi.number().min(0),
-      jmlhPasKasusUmurSex4th14thP: joi.number().min(0),
-      jmlhPasKasusUmurSex14th24thL: joi.number().min(0),
-      jmlhPasKasusUmurSex14th24thP: joi.number().min(0),
-      jmlhPasKasusUmurSex24th44thL: joi.number().min(0),
-      jmlhPasKasusUmurSex24th44thP: joi.number().min(0),
-      jmlhPasKasusUmurSex44th64L: joi.number().min(0),
-      jmlhPasKasusUmurSex44th64P: joi.number().min(0),
-      jmlhPasKasusUmurSexLebih64L: joi.number().min(0),
-      jmlhPasKasusUmurSexLebih64P: joi.number().min(0),
-      kasusBaruL: joi.number().min(0),
-      kasusBaruP: joi.number().min(0),
-      jmlhKunjungan: joi.number().min(0),
+      jmlhPasKasusUmurSex0hr6hrL: joi.number().min(0).max(9999999).required(),
+      jmlhPasKasusUmurSex0hr6hrP: joi.number().min(0).max(9999999).required(),
+      jmlhPasKasusUmurSex6hr28hrL: joi.number().min(0).max(9999999).required(),
+      jmlhPasKasusUmurSex6hr28hrP: joi.number().min(0).max(9999999).required(),
+      jmlhPasKasusUmurSex28hr1thL: joi.number().min(0).max(9999999).required(),
+      jmlhPasKasusUmurSex28hr1thP: joi.number().min(0).max(9999999).required(),
+      jmlhPasKasusUmurSex1th4thL: joi.number().min(0).max(9999999).required(),
+      jmlhPasKasusUmurSex1th4thP: joi.number().min(0).max(9999999).required(),
+      jmlhPasKasusUmurSex4th14thL: joi.number().min(0).max(9999999).required(),
+      jmlhPasKasusUmurSex4th14thP: joi.number().min(0).max(9999999).required(),
+      jmlhPasKasusUmurSex14th24thL: joi.number().min(0).max(9999999).required(),
+      jmlhPasKasusUmurSex14th24thP: joi.number().min(0).max(9999999).required(),
+      jmlhPasKasusUmurSex24th44thL: joi.number().min(0).max(9999999).required(),
+      jmlhPasKasusUmurSex24th44thP: joi.number().min(0).max(9999999).required(),
+      jmlhPasKasusUmurSex44th64L: joi.number().min(0).max(9999999).required(),
+      jmlhPasKasusUmurSex44th64P: joi.number().min(0).max(9999999).required(),
+      jmlhPasKasusUmurSexLebih64L: joi.number().min(0).max(9999999).required(),
+      jmlhPasKasusUmurSexLebih64P: joi.number().min(0).max(9999999).required(),
+      jmlhKunjungan: joi.number().min(0).max(9999999).required(),
     });
     const { error, value } = schema.validate(req.body);
     if (error) {
@@ -375,12 +374,16 @@ export const updateDataRLEmpatSebabId = async (req, res) => {
           {
             where: {
               id: req.params.id,
+              rs_id: req.user.rsId,
             },
           }
         );
         res.status(200).json({
           status: true,
           message: "Success Update Data",
+          data: {
+            updated_rows: update,
+          },
         });
       } else {
         res.status(400).send({

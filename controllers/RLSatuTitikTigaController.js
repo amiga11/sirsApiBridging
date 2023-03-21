@@ -102,20 +102,23 @@ export const getDataRLSatuTitikTigaDetailById = async (req, res) => {
 };
 
 export const insertDataRLSatuTitikTiga = async (req, res) => {
+  const currentYear = new Date().getFullYear();
   const schema = Joi.object({
-    tahun: Joi.number().required(),
+    tahun: Joi.number()
+      .min(currentYear - 1)
+      .required(),
     data: Joi.array()
       .items(
         Joi.object()
           .keys({
-            jenisPelayananId: Joi.number().required(),
-            jumlahTempatTidur: Joi.number().required(),
-            kelasVVIP: Joi.number().required(),
-            kelasVIP: Joi.number().required(),
-            kelas1: Joi.number().required(),
-            kelas2: Joi.number().required(),
-            kelas3: Joi.number().required(),
-            kelasKhusus: Joi.number().required(),
+            jenisPelayananId: Joi.number().min(0).max(9999999).required(),
+            // jumlahTempatTidur: Joi.number().min(0).max(9999999).required(),
+            kelasVVIP: Joi.number().min(0).max(9999999).required(),
+            kelasVIP: Joi.number().min(0).max(9999999).required(),
+            kelas1: Joi.number().min(0).max(9999999).required(),
+            kelas2: Joi.number().min(0).max(9999999).required(),
+            kelas3: Joi.number().min(0).max(9999999).required(),
+            kelasKhusus: Joi.number().min(0).max(9999999).required(),
           })
           .required()
       )
@@ -130,10 +133,15 @@ export const insertDataRLSatuTitikTiga = async (req, res) => {
     });
     return;
   }
+  let jenPel = [
+    43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
+    62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72,
+  ];
 
-  let transaction;
+  let jumlahTempatTidur;
+
+  const transaction = await databaseSIRS.transaction();
   try {
-    transaction = await databaseSIRS.transaction();
     const resultInsertHeader = await rlSatuTitikTigaHeader.create(
       {
         rs_id: req.user.rsId,
@@ -141,18 +149,28 @@ export const insertDataRLSatuTitikTiga = async (req, res) => {
         user_id: req.user.id,
       },
       {
-        transaction,
-        updateOnDuplicate: ["tahun"],
+        transaction: transaction,
       }
     );
-
     const dataDetail = req.body.data.map((value, index) => {
+      if (jenPel.includes(value.jenisPelayananId) == false) {
+        console.log("Jenis Pelayanan Salah");
+        throw new SyntaxError("0");
+      }
+
+      jumlahTempatTidur =
+        value.kelasVVIP +
+        value.kelasVIP +
+        value.kelas1 +
+        value.kelas2 +
+        value.kelas3 +
+        value.kelasKhusus;
       return {
         rs_id: req.user.rsId,
         tahun: req.body.tahun,
         rl_satu_titik_tiga_id: resultInsertHeader.id,
         jenis_pelayanan_id: value.jenisPelayananId,
-        jumlah_tempat_tidur: value.jumlahTempatTidur,
+        jumlah_tempat_tidur: jumlahTempatTidur,
         kelas_VVIP: value.kelasVVIP,
         kelas_VIP: value.kelasVIP,
         kelas_1: value.kelas1,
@@ -166,43 +184,58 @@ export const insertDataRLSatuTitikTiga = async (req, res) => {
     const resultInsertDetail = await rlSatuTitikTigaDetail.bulkCreate(
       dataDetail,
       {
-        transaction,
-        updateOnDuplicate: [
-          "jumlah_tempat_tidur",
-          "kelas_VVIP",
-          "kelas_VIP",
-          "kelas_1",
-          "kelas_2",
-          "kelas_3",
-          "kelas_khusus",
-        ],
+        transaction: transaction,
       }
     );
+
     await transaction.commit();
     res.status(201).send({
       status: true,
       message: "data created",
-      data: {
-        id: resultInsertHeader.id,
-      },
     });
   } catch (error) {
-    res.status(400).send({
-      status: false,
-      message: "data not created",
-      error: error,
-    });
-    if (transaction) {
-      await transaction.rollback();
+    console.log(error);
+    await transaction.rollback();
+    if (error.message == "0") {
+      res.status(400).send({
+        status: false,
+        message: "data not created",
+        error: "Jenis Pelayanan Salah",
+      });
+    } else if (error.name === "SequelizeUniqueConstraintError") {
+      res.status(400).send({
+        status: false,
+        message: "Duplicate Entry",
+      });
+    } else {
+      res.status(400).send({
+        status: false,
+        message: error,
+      });
     }
   }
 };
 
 export const updateDataRLSatuTitikTiga = async (req, res) => {
+  const schema = Joi.object({
+    kelasVVIP: Joi.number().min(0).max(9999999).required(),
+    kelasVIP: Joi.number().min(0).max(9999999).required(),
+    kelas1: Joi.number().min(0).max(9999999).required(),
+    kelas2: Joi.number().min(0).max(9999999).required(),
+    kelas3: Joi.number().min(0).max(9999999).required(),
+    kelasKhusus: Joi.number().min(0).max(9999999).required(),
+  }).required();
+  const { error, value } = schema.validate(req.body);
+  if (error) {
+    res.status(404).send({
+      status: false,
+      message: error.details[0].message,
+    });
+    return;
+  }
   try {
     const update = await rlSatuTitikTigaDetail.update(
       {
-        jumlah_tempat_tidur: req.body.jumlahTempatTidur,
         kelas_VVIP: req.body.kelasVVIP,
         kelas_VIP: req.body.kelasVIP,
         kelas_1: req.body.kelas1,
@@ -214,12 +247,16 @@ export const updateDataRLSatuTitikTiga = async (req, res) => {
       {
         where: {
           id: req.params.id,
+          rs_id: req.user.rsId,
         },
       }
     );
     res.status(200).json({
       status: true,
-      message: update,
+      message: "data update successfully",
+      data: {
+        updated_row: update,
+      },
     });
   } catch (error) {
     console.log(error.message);
@@ -231,6 +268,7 @@ export const deleteDataRLSatuTitikTiga = async (req, res) => {
     const count = await rlSatuTitikTigaDetail.destroy({
       where: {
         id: req.params.id,
+        rs_id: req.user.rsId,
       },
     });
     res.status(201).send({
@@ -243,7 +281,7 @@ export const deleteDataRLSatuTitikTiga = async (req, res) => {
   } catch (error) {
     res.status(404).send({
       status: false,
-      message: error,
+      message: error.message,
     });
   }
 };

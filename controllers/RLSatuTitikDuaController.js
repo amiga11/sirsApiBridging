@@ -83,15 +83,48 @@ export const getrlSatuTitikDuaById = async (req, res) => {
     });
 };
 export const updateDatarlSatuTitikDua = async (req, res) => {
+  const schema = Joi.object({
+    los: Joi.number().min(0).max(999).required(),
+    bor: Joi.number().min(0.0).max(999.999).required(),
+    toi: Joi.number().min(0.0).max(999.999).required(),
+    bto: Joi.number().min(0.0).max(999.999).required(),
+    ndr: Joi.number().min(0.0).max(999.999).required(),
+    gdr: Joi.number().min(0.0).max(999.999).required(),
+    rataKunjungan: Joi.number().min(0.0).max(999.999).required(),
+  });
+  const { error, value } = schema.validate(req.body);
+  if (error) {
+    res.status(404).send({
+      status: false,
+      message: error.details[0].message,
+    });
+    return;
+  }
+
+  const dataDetail = {
+    bor: req.body.bor,
+    los: req.body.los,
+    bto: req.body.bto,
+    toi: req.body.toi,
+    ndr: req.body.ndr,
+    gdr: req.body.gdr,
+    rata_kunjungan: req.body.rataKunjungan,
+  };
+
   try {
-    await rlSatuTitikDuaDetail.update(req.body, {
+    const count = await rlSatuTitikDuaDetail.update(dataDetail, {
       where: {
         id: req.params.id,
+        rs_id: req.user.rsId,
       },
     });
-    res
-      .status(200)
-      .json({ message: "Rekapitulasi Laporan Telah Diperbaharui" });
+    res.status(200).json({
+      status: true,
+      message: "data update successfully",
+      data: {
+        updated_row: count,
+      },
+    });
   } catch (error) {
     console.log(error.message);
   }
@@ -100,13 +133,13 @@ export const updateDatarlSatuTitikDua = async (req, res) => {
 export const insertDataRLSatuTitikDua = async (req, res) => {
   const schema = Joi.object({
     tahun: Joi.number().required(),
-    los: Joi.number().required(),
-    bor: Joi.number().required(),
-    toi: Joi.number().required(),
-    bto: Joi.number().required(),
-    ndr: Joi.number().required(),
-    gdr: Joi.number().required(),
-    rataKunjungan: Joi.number().required(),
+    los: Joi.number().min(0).max(999).required(),
+    bor: Joi.number().min(0.0).max(999.999).required(),
+    toi: Joi.number().min(0.0).max(999.999).required(),
+    bto: Joi.number().min(0.0).max(999.999).required(),
+    ndr: Joi.number().min(0.0).max(999.999).required(),
+    gdr: Joi.number().min(0.0).max(999.999).required(),
+    rataKunjungan: Joi.number().min(0.0).max(999.999).required(),
   });
 
   const { error, value } = schema.validate(req.body);
@@ -118,9 +151,8 @@ export const insertDataRLSatuTitikDua = async (req, res) => {
     return;
   }
 
-  let transaction;
+  const transaction = await databaseSIRS.transaction();
   try {
-    transaction = await databaseSIRS.transaction();
     const resultInsertHeader = await rlSatuTitikDuaHeader.create(
       {
         rs_id: req.user.rsId,
@@ -128,9 +160,10 @@ export const insertDataRLSatuTitikDua = async (req, res) => {
         user_id: req.user.id,
       },
       {
-        transaction,
+        transaction: transaction,
       }
     );
+
     const dataDetail = {
       rs_id: req.user.rsId,
       rl_satu_titik_dua_id: resultInsertHeader.id,
@@ -146,29 +179,28 @@ export const insertDataRLSatuTitikDua = async (req, res) => {
     };
 
     const resultInsertDetail = await rlSatuTitikDuaDetail.create(dataDetail, {
-      transaction,
-      updateOnDuplicate: [
-        "bor",
-        "los",
-        "bto",
-        "toi",
-        "ndr",
-        "gdr",
-        "rata_kunjungan",
-      ],
+      transaction: transaction,
+      // updateOnDuplicate: ['bor', 'los', 'bto', 'toi', 'ndr', 'gdr', 'rata_kunjungan']
     });
+    console.log(dataDetail);
     await transaction.commit();
     res.status(201).send({
       status: true,
       message: "data created",
-      data: {
-        id: resultInsertHeader.id,
-      },
     });
   } catch (error) {
     console.log(error);
-    if (transaction) {
-      await transaction.rollback();
+    await transaction.rollback();
+    if (error.name === "SequelizeUniqueConstraintError") {
+      res.status(400).send({
+        status: false,
+        message: "Duplicate Entry",
+      });
+    } else {
+      res.status(400).send({
+        status: false,
+        message: error,
+      });
     }
   }
 };

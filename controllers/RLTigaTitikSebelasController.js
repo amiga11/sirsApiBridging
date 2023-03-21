@@ -93,30 +93,48 @@ export const getrlTigaTitikSebelasById = async (req, res) => {
 };
 
 export const updateDatarlTigaTitikSebelas = async (req, res) => {
+  const schema = Joi.object({
+    jumlah: Joi.number().min(0).max(9999999).required(),
+  }).required();
+  const { error, value } = schema.validate(req.body);
+  if (error) {
+    res.status(404).send({
+      status: false,
+      message: error.details[0].message,
+    });
+    return;
+  }
   try {
-    await rlTigaTitikSebelasDetail.update(req.body, {
+    const upDat = await rlTigaTitikSebelasDetail.update(req.body, {
       where: {
         id: req.params.id,
+        rs_id: req.user.rsId,
       },
     });
-    console.log(req.body);
-    res
-      .status(200)
-      .json({ message: "Rekapitulasi Laporan Telah Diperbaharui" });
+    // console.log(req.body);
+    res.status(200).json({
+      message: "data update successfully",
+      data: {
+        updated_row: upDat,
+      },
+    });
   } catch (error) {
     console.log(error.message);
   }
 };
 
 export const insertDataRLTigaTitikSebelas = async (req, res) => {
+  const currentYear = new Date().getFullYear();
   const schema = Joi.object({
-    tahun: Joi.number().required(),
+    tahun: Joi.number()
+      .min(currentYear - 1)
+      .required(),
     data: Joi.array()
       .items(
         Joi.object()
           .keys({
             jenisPelayananId: Joi.number().required(),
-            jumlah: Joi.number().required(),
+            jumlah: Joi.number().min(0).max(9999999).required(),
           })
           .required()
       )
@@ -131,10 +149,11 @@ export const insertDataRLTigaTitikSebelas = async (req, res) => {
     });
     return;
   }
-  // console.log(req.user);
-  let transaction;
+
+  let jenPel = [16, 17, 18, 19, 20, 21, 22, 73];
+
+  let transaction = await databaseSIRS.transaction();
   try {
-    transaction = await databaseSIRS.transaction();
     const resultInsertHeader = await rlTigaTitikSebelasHeader.create(
       {
         rs_id: req.user.rsId,
@@ -142,11 +161,15 @@ export const insertDataRLTigaTitikSebelas = async (req, res) => {
         user_id: req.user.id,
       },
       {
-        transaction,
+        transaction: transaction,
       }
     );
 
     const dataDetail = req.body.data.map((value, index) => {
+      if (jenPel.includes(value.jenisPelayananId) == false) {
+        console.log("Jenis Pelayanan Salah");
+        throw new SyntaxError("0");
+      }
       return {
         rs_id: req.user.rsId,
         tahun: req.body.tahun,
@@ -160,8 +183,7 @@ export const insertDataRLTigaTitikSebelas = async (req, res) => {
     const resultInsertDetail = await rlTigaTitikSebelasDetail.bulkCreate(
       dataDetail,
       {
-        transaction,
-        updateOnDuplicate: ["jumlah"],
+        transaction: transaction,
       }
     );
 
@@ -170,14 +192,26 @@ export const insertDataRLTigaTitikSebelas = async (req, res) => {
     res.status(201).send({
       status: true,
       message: "data created",
-      data: {
-        id: resultInsertHeader.id,
-      },
     });
   } catch (error) {
     console.log(error);
-    if (transaction) {
-      await transaction.rollback();
+    await transaction.rollback();
+    if (error.message == "0") {
+      res.status(400).send({
+        status: false,
+        message: "data not created",
+        error: "Jenis Pelayanan Salah",
+      });
+    } else if (error.name === "SequelizeUniqueConstraintError") {
+      res.status(400).send({
+        status: false,
+        message: "Duplicate Entry",
+      });
+    } else {
+      res.status(400).send({
+        status: false,
+        message: error,
+      });
     }
   }
 };
@@ -187,6 +221,7 @@ export const deleteDataRLTigaTitikSebelas = async (req, res) => {
     const count = await rlTigaTitikSebelasDetail.destroy({
       where: {
         id: req.params.id,
+        rs_id: req.user.rsId,
       },
     });
     res.status(201).send({

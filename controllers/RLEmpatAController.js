@@ -88,34 +88,91 @@ export const getDataRLEmpatAById = (req, res) => {
 };
 
 export const insertDataRLEmpatA = async (req, res) => {
+  const currentYear = new Date().getFullYear();
   const schema = Joi.object({
-    tahun: Joi.number().required(),
+    tahun: Joi.number()
+      .min(currentYear - 1)
+      .required(),
     data: Joi.array()
       .items(
         Joi.object().keys({
-          jenisGolSebabPenyakitId: Joi.number(),
-          jmlhPasHidupMatiUmurSex6hrL: Joi.number(),
-          jmlhPasHidupMatiUmurSex6hrP: Joi.number(),
-          jmlhPasHidupMatiUmurSex28hrL: Joi.number(),
-          jmlhPasHidupMatiUmurSex28hrP: Joi.number(),
-          jmlhPasHidupMatiUmurSex28hr1thL: Joi.number(),
-          jmlhPasHidupMatiUmurSex28hr1thP: Joi.number(),
-          jmlhPasHidupMatiUmurSex14thL: Joi.number(),
-          jmlhPasHidupMatiUmurSex14thP: Joi.number(),
-          jmlhPasHidupMatiUmurSex414thL: Joi.number(),
-          jmlhPasHidupMatiUmurSex414thP: Joi.number(),
-          jmlhPasHidupMatiUmurSex1424thL: Joi.number(),
-          jmlhPasHidupMatiUmurSex1424thP: Joi.number(),
-          jmlhPasHidupMatiUmurSex2444thL: Joi.number(),
-          jmlhPasHidupMatiUmurSex2444thP: Joi.number(),
-          jmlhPasHidupMatiUmurSex4464thL: Joi.number(),
-          jmlhPasHidupMatiUmurSex4464thP: Joi.number(),
-          jmlhPasHidupMatiUmurSexLebih64thL: Joi.number(),
-          jmlhPasHidupMatiUmurSexLebih64thP: Joi.number(),
-          jmlhPasKeluarHidupMatiLP: Joi.number(),
-          jmlhPasKeluarHidupMatiSexL: Joi.number(),
-          jmlhPasKeluarHidupMatiSexP: Joi.number(),
-          jmlhPasKeluarMati: Joi.number(),
+          jenisGolSebabPenyakitId: Joi.number().min(1).required(),
+          jmlhPasHidupMatiUmurSex6hrL: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
+          jmlhPasHidupMatiUmurSex6hrP: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
+          jmlhPasHidupMatiUmurSex28hrL: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
+          jmlhPasHidupMatiUmurSex28hrP: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
+          jmlhPasHidupMatiUmurSex28hr1thL: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
+          jmlhPasHidupMatiUmurSex28hr1thP: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
+          jmlhPasHidupMatiUmurSex14thL: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
+          jmlhPasHidupMatiUmurSex14thP: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
+          jmlhPasHidupMatiUmurSex414thL: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
+          jmlhPasHidupMatiUmurSex414thP: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
+          jmlhPasHidupMatiUmurSex1424thL: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
+          jmlhPasHidupMatiUmurSex1424thP: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
+          jmlhPasHidupMatiUmurSex2444thL: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
+          jmlhPasHidupMatiUmurSex2444thP: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
+          jmlhPasHidupMatiUmurSex4464thL: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
+          jmlhPasHidupMatiUmurSex4464thP: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
+          jmlhPasHidupMatiUmurSexLebih64thL: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
+          jmlhPasHidupMatiUmurSexLebih64thP: Joi.number()
+            .min(0)
+            .max(9999999)
+            .required(),
+          // jmlhPasKeluarHidupMatiLP: Joi.number().min(0).max(9999999).required(),
+          // jmlhPasKeluarHidupMatiSexL: Joi.number().min(0).max(9999999).required(),
+          // jmlhPasKeluarHidupMatiSexP: Joi.number().min(0).max(9999999).required(),
+          jmlhPasKeluarMati: Joi.number().min(0).max(9999999).required(),
         })
       )
       .required(),
@@ -130,9 +187,8 @@ export const insertDataRLEmpatA = async (req, res) => {
     return;
   }
 
-  let transaction;
+  const transaction = await databaseSIRS.transaction();
   try {
-    transaction = await databaseSIRS.transaction();
     const resultInsertHeader = await rlEmpatAHeader.create(
       {
         rs_id: req.user.rsId,
@@ -143,6 +199,11 @@ export const insertDataRLEmpatA = async (req, res) => {
     );
 
     const dataDetail = req.body.data.map((value, index) => {
+      if (value.jenisGolSebabPenyakitId > 520) {
+        console.log(value.jenisGolSebabPenyakitId);
+        console.log("Jenis Golongan Sebab Penyakit Salah");
+        throw new SyntaxError("0");
+      }
       let jumlahL =
         value.jmlhPasHidupMatiUmurSex6hrL +
         value.jmlhPasHidupMatiUmurSex28hrL +
@@ -164,8 +225,15 @@ export const insertDataRLEmpatA = async (req, res) => {
         value.jmlhPasHidupMatiUmurSex2444thP +
         value.jmlhPasHidupMatiUmurSex4464thP +
         value.jmlhPasHidupMatiUmurSexLebih64thP;
-
+      let temp = index + 1;
       let jumlahall = jumlahL + jumlahP;
+      if (jumlahall <= value.jmlhPasKeluarMati) {
+        console.log(
+          "Jumlah Pasien Mati Lebih Dari Jumlah Pasien Hidup/Mati Data Ke-" +
+            temp
+        );
+        throw new SyntaxError("1");
+      }
       return {
         rl_empat_a_id: resultInsertHeader.id,
         rs_id: req.user.rsId,
@@ -212,54 +280,42 @@ export const insertDataRLEmpatA = async (req, res) => {
         user_id: req.user.id,
       };
     });
-
-    if (
-      dataDetail[0].jmlh_pas_keluar_mati <=
-      dataDetail[0].jmlh_pas_keluar_hidup_mati_lp
-    ) {
-      const resultInsertDetail = await rlEmpatADetail.bulkCreate(dataDetail, {
-        transaction,
-        updateOnDuplicate: [
-          "jmlh_pas_hidup_mati_umur_sex_0_6hr_l",
-          "jmlh_pas_hidup_mati_umur_sex_0_6hr_p",
-          "jmlh_pas_hidup_mati_umur_sex_6_28hr_l",
-          "jmlh_pas_hidup_mati_umur_sex_6_28hr_p",
-          "jmlh_pas_hidup_mati_umur_sex_28hr_1th_l",
-          "jmlh_pas_hidup_mati_umur_sex_28hr_1th_p",
-          "jmlh_pas_hidup_mati_umur_sex_1_4th_l",
-          "jmlh_pas_hidup_mati_umur_sex_1_4th_p",
-          "jmlh_pas_hidup_mati_umur_sex_4_14th_l",
-          "jmlh_pas_hidup_mati_umur_sex_4_14th_p",
-          "jmlh_pas_hidup_mati_umur_sex_14_24th_l",
-          "jmlh_pas_hidup_mati_umur_sex_14_24th_p",
-          "jmlh_pas_hidup_mati_umur_sex_24_44th_l",
-          "jmlh_pas_hidup_mati_umur_sex_24_44th_p",
-          "jmlh_pas_hidup_mati_umur_sex_44_64th_l",
-          "jmlh_pas_hidup_mati_umur_sex_44_64th_p",
-          "jmlh_pas_hidup_mati_umur_sex_lebih_64th_l",
-          "jmlh_pas_hidup_mati_umur_sex_lebih_64th_p",
-          "jmlh_pas_keluar_hidup_mati_sex_l",
-          "jmlh_pas_keluar_hidup_mati_sex_p",
-          "jmlh_pas_keluar_hidup_mati_lp",
-          "jmlh_pas_keluar_mati",
-        ],
-      });
-      await transaction.commit();
-      res.status(201).send({
-        status: true,
-        message: "data created",
-        data: {
-          id: resultInsertHeader.id,
-        },
-      });
-    } else {
+    const resultInsertDetail = await rlEmpatADetail.bulkCreate(dataDetail, {
+      transaction: transaction,
+    });
+    await transaction.commit();
+    res.status(201).send({
+      status: true,
+      message: "data created",
+    });
+  } catch (error) {
+    // console.log(error.message);
+    if (error.message == "0") {
       res.status(400).send({
         status: false,
-        message: "Data Jumlah Pasien Mati Lebih Dari Jumlah Pasien Hidup/Mati",
+        message: "data not created",
+        error: "Jenis Golongan Sebab Penyakit salah",
+      });
+    } else if (error.message == "1") {
+      res.status(400).send({
+        status: false,
+        message: "data not created",
+        error:
+          "Terdapat Data Jumlah Pasien Mati Lebih Dari Jumlah Pasien Hidup/Mati",
+      });
+    } else if (error.name === "SequelizeUniqueConstraintError") {
+      res.status(400).send({
+        status: false,
+        message: "Duplicate Entry",
+      });
+    } else {
+      console.log(error.message);
+      res.status(400).send({
+        status: false,
+        message: "data not created",
+        error: error.message,
       });
     }
-  } catch (error) {
-    console.log(error);
     if (transaction) {
       await transaction.rollback();
     }
@@ -268,25 +324,25 @@ export const insertDataRLEmpatA = async (req, res) => {
 
 export const updateDataRLEmpatA = async (req, res) => {
   const schema = Joi.object({
-    par6hrL: Joi.number().min(0),
-    par6hrP: Joi.number().min(0),
-    par14thL: Joi.number().min(0),
-    par14thP: Joi.number().min(0),
-    par28hr1thL: Joi.number().min(0),
-    par28hr1thP: Joi.number().min(0),
-    par28hrL: Joi.number().min(0),
-    par28hrP: Joi.number().min(0),
-    par414thL: Joi.number().min(0),
-    par414thP: Joi.number().min(0),
-    par1424thL: Joi.number().min(0),
-    par1424thP: Joi.number().min(0),
-    par2444thL: Joi.number().min(0),
-    par2444thP: Joi.number().min(0),
-    par4464thL: Joi.number().min(0),
-    par4464thP: Joi.number().min(0),
-    parLebih64thL: Joi.number().min(0),
-    parLebih64thP: Joi.number().min(0),
-    jmlhPasKeluarMati: Joi.number().min(0),
+    par6hrL: Joi.number().min(0).max(9999999).required(),
+    par6hrP: Joi.number().min(0).max(9999999).required(),
+    par14thL: Joi.number().min(0).max(9999999).required(),
+    par14thP: Joi.number().min(0).max(9999999).required(),
+    par28hr1thL: Joi.number().min(0).max(9999999).required(),
+    par28hr1thP: Joi.number().min(0).max(9999999).required(),
+    par28hrL: Joi.number().min(0).max(9999999).required(),
+    par28hrP: Joi.number().min(0).max(9999999).required(),
+    par414thL: Joi.number().min(0).max(9999999).required(),
+    par414thP: Joi.number().min(0).max(9999999).required(),
+    par1424thL: Joi.number().min(0).max(9999999).required(),
+    par1424thP: Joi.number().min(0).max(9999999).required(),
+    par2444thL: Joi.number().min(0).max(9999999).required(),
+    par2444thP: Joi.number().min(0).max(9999999).required(),
+    par4464thL: Joi.number().min(0).max(9999999).required(),
+    par4464thP: Joi.number().min(0).max(9999999).required(),
+    parLebih64thL: Joi.number().min(0).max(9999999).required(),
+    parLebih64thP: Joi.number().min(0).max(9999999).required(),
+    jmlhPasKeluarMati: Joi.number().min(0).max(9999999).required(),
   });
   const { error, value } = schema.validate(req.body);
   if (error) {
@@ -349,12 +405,19 @@ export const updateDataRLEmpatA = async (req, res) => {
       dataUpdate.jmlh_pas_keluar_mati <=
       dataUpdate.jmlh_pas_keluar_hidup_mati_lp
     ) {
-      await rlEmpatADetail.update(dataUpdate, {
+      const upDat = await rlEmpatADetail.update(dataUpdate, {
         where: {
           id: req.params.id,
+          rs_id: req.user.rsId,
         },
       });
-      res.status(200).json({ message: "RL 4a Updated" });
+      res.status(200).json({
+        status: true,
+        message: "data update successfully",
+        data: {
+          updated_rows: upDat,
+        },
+      });
     } else {
       res.status(400).send({
         status: false,
@@ -371,6 +434,7 @@ export const deleteDataRLEmpatA = async (req, res) => {
     const count = await rlEmpatADetail.destroy({
       where: {
         id: req.params.id,
+        rs_id: req.user.rsId,
       },
     });
     res.status(201).send({

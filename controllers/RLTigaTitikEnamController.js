@@ -95,17 +95,21 @@ export const getDataRLTigaTitikEnamId = (req, res) => {
 };
 
 export const insertDataRLTigaTitikEnam = async (req, res) => {
+  const currentYear = new Date().getFullYear();
   const schema = joi.object({
-    tahun: joi.number().required(),
+    tahun: joi
+      .number()
+      .min(currentYear - 1)
+      .required(),
     data: joi
       .array()
       .items(
         joi.object().keys({
-          jenisSpesialisId: joi.number(),
-          khusus: joi.number().min(0),
-          besar: joi.number().min(0),
-          sedang: joi.number().min(0),
-          kecil: joi.number().min(0),
+          jenisSpesialisId: joi.number().min(1),
+          khusus: joi.number().min(0).max(9999999),
+          besar: joi.number().min(0).max(9999999),
+          sedang: joi.number().min(0).max(9999999),
+          kecil: joi.number().min(0).max(9999999),
         })
       )
       .required(),
@@ -120,21 +124,22 @@ export const insertDataRLTigaTitikEnam = async (req, res) => {
     return;
   }
 
-  let transaction;
-
+  const transaction = await databaseSIRS.transaction();
   try {
-    transaction = await databaseSIRS.transaction();
     const resultInsertHeader = await rlTigaTitikEnamHeader.create(
       {
         rs_id: req.user.rsId,
         tahun: req.body.tahun,
         user_id: req.user.id,
       },
-      { transaction }
+      { transaction: transaction }
     );
 
-    // console.log(resultInsertHeader.id)
     const dataDetail = req.body.data.map((value, index) => {
+      if (value.jenisSpesialisId > 14) {
+        console.log("Jenis Spesialis Salah");
+        throw new SyntaxError("0");
+      }
       let totalall = value.khusus + value.besar + value.sedang + value.kecil;
       return {
         tahun: req.body.tahun,
@@ -153,34 +158,33 @@ export const insertDataRLTigaTitikEnam = async (req, res) => {
     const resultInsertDetail = await rlTigaTitikEnamDetail.bulkCreate(
       dataDetail,
       {
-        transaction,
-        updateOnDuplicate: ["total", "khusus", "besar", "sedang", "kecil"],
+        transaction: transaction,
+        // updateOnDuplicate: ['total', 'khusus', 'besar', 'sedang', 'kecil']
       }
     );
     await transaction.commit();
     res.status(201).send({
       status: true,
       message: "data created",
-      data: {
-        id: resultInsertHeader.id,
-      },
     });
   } catch (error) {
-    if (transaction) {
-      await transaction.rollback();
-      // console.log(error)
-      if (error.name === "SequelizeUniqueConstraintError") {
-        res.status(400).send({
-          status: false,
-          message: "Fail Duplicate Entry",
-          // reason: 'Duplicate Entry'
-        });
-      } else {
-        res.status(400).send({
-          status: false,
-          message: "error",
-        });
-      }
+    console.log(error);
+    await transaction.rollback();
+    if (error.message == "0") {
+      res.status(400).send({
+        status: false,
+        message: "Jenis Spesialis Salah",
+      });
+    } else if (error.name === "SequelizeUniqueConstraintError") {
+      res.status(400).send({
+        status: false,
+        message: "Duplicate Entry",
+      });
+    } else {
+      res.status(400).send({
+        status: false,
+        message: error,
+      });
     }
   }
 };
@@ -190,6 +194,7 @@ export const deleteDataRLTigaTitikEnamId = async (req, res) => {
     await rlTigaTitikEnamDetail.destroy({
       where: {
         id: req.params.id,
+        rs_id: req.user.rsId,
       },
     });
     res.status(201).send({
@@ -203,24 +208,43 @@ export const deleteDataRLTigaTitikEnamId = async (req, res) => {
 };
 
 export const updateDataRLTigaTitikEnamId = async (req, res) => {
+  const schema = joi
+    .object({
+      khusus: joi.number().min(0).max(9999999),
+      besar: joi.number().min(0).max(9999999),
+      sedang: joi.number().min(0).max(9999999),
+      kecil: joi.number().min(0).max(9999999),
+    })
+    .required();
   try {
     const data = req.body;
-    data["total"] = data.khusus + data.besar + data.sedang + data.kecil;
+    let totalall = data.khusus + data.besar + data.sedang + data.kecil;
     // console.log(data)
+    let dataUpdate = {
+      total: totalall,
+      khusus: data.khusus,
+      besar: data.besar,
+      sedang: data.sedang,
+      kecil: data.kecil,
+    };
     try {
-      const test = await rlTigaTitikEnamDetail.update(data, {
+      const upDat = await rlTigaTitikEnamDetail.update(dataUpdate, {
         where: {
           id: req.params.id,
+          rs_id: req.user.rsId,
         },
       });
       res.status(201).send({
         status: true,
         message: "data Updated",
+        data: {
+          updated_row: upDat,
+        },
       });
     } catch (error) {
       res.status(400).send({
         status: false,
-        message: "Update Data Fail",
+        message: error,
       });
     }
   } catch (error) {

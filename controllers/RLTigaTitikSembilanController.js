@@ -29,14 +29,18 @@ export const getDataRLTigaTitikSembilan = (req, res) => {
 };
 
 export const insertDataRLTigaTitikSembilan = async (req, res) => {
+  const currentYear = new Date().getFullYear();
   const schema = joi.object({
-    tahun: joi.number().required(),
+    tahun: joi
+      .number()
+      .min(currentYear - 1)
+      .required(),
     data: joi
       .array()
       .items(
         joi.object().keys({
-          jenisTindakanId: joi.number(),
-          jumlah: joi.number().min(0),
+          jenisTindakanId: joi.number().required(),
+          jumlah: joi.number().min(0).max(9999999).required(),
         })
       )
       .required(),
@@ -51,20 +55,28 @@ export const insertDataRLTigaTitikSembilan = async (req, res) => {
     return;
   }
 
-  let transaction;
+  let jenTind = [
+    2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 20, 21, 22, 23, 24,
+    25, 26, 27, 28, 30, 31, 32, 33, 35, 36, 37, 39, 40, 41, 42, 44, 45, 46, 47,
+  ];
+
+  const transaction = await databaseSIRS.transaction();
 
   try {
-    transaction = await databaseSIRS.transaction();
     const resultInsertHeader = await rlTigaTitikSembilanHeader.create(
       {
         rs_id: req.user.rsId,
         tahun: req.body.tahun,
         user_id: req.user.id,
       },
-      { transaction }
+      { transaction: transaction }
     );
 
     const dataDetail = req.body.data.map((value, index) => {
+      if (jenTind.includes(value.jenisTindakanId) == false) {
+        console.log("Jenis Tindakan Salah");
+        throw new SyntaxError("0");
+      }
       return {
         rl_tiga_titik_sembilan_id: resultInsertHeader.id,
         jenis_tindakan_id: value.jenisTindakanId,
@@ -78,8 +90,7 @@ export const insertDataRLTigaTitikSembilan = async (req, res) => {
     const resultInsertDetail = await rlTigaTitikSembilanDetail.bulkCreate(
       dataDetail,
       {
-        transaction,
-        updateOnDuplicate: ["jumlah"],
+        transaction: transaction,
       }
     );
     await transaction.commit();
@@ -87,28 +98,28 @@ export const insertDataRLTigaTitikSembilan = async (req, res) => {
     res.status(201).send({
       status: true,
       message: "data created",
-      data: {
-        id: resultInsertHeader.id,
-      },
     });
 
     // console.log('Success')
   } catch (error) {
     console.log(error);
-    if (transaction) {
-      await transaction.rollback();
-      if (error.name === "SequelizeUniqueConstraintError") {
-        res.status(400).send({
-          status: false,
-          message: "Fail Duplicate Entry",
-          // reason: 'Duplicate Entry'
-        });
-      } else {
-        res.status(400).send({
-          status: false,
-          message: "error",
-        });
-      }
+    await transaction.rollback();
+    if (error.message == "0") {
+      res.status(400).send({
+        status: false,
+        message: "data not created",
+        error: "Jenis Tindakan Salah",
+      });
+    } else if (error.name === "SequelizeUniqueConstraintError") {
+      res.status(400).send({
+        status: false,
+        message: "Fail Duplicate Entry",
+      });
+    } else {
+      res.status(400).send({
+        status: false,
+        message: "error",
+      });
     }
   }
 };
@@ -176,17 +187,34 @@ export const getDataRLTigaTitikSembilanId = async (req, res) => {
 };
 
 export const updateDataRLTigaTitikSembilanId = async (req, res) => {
+  const schema = joi
+    .object({
+      jumlah: joi.number().min(0).max(9999999).required(),
+    })
+    .required();
+  const { error, value } = schema.validate(req.body);
+  if (error) {
+    res.status(404).send({
+      status: false,
+      message: error.details[0].message,
+    });
+    return;
+  }
   try {
     const data = req.body;
     try {
       const update = await rlTigaTitikSembilanDetail.update(data, {
         where: {
           id: req.params.id,
+          rs_id: req.user.rsId,
         },
       });
       res.status(201).send({
         status: true,
         message: "data Updated",
+        data: {
+          updated_row: update,
+        },
       });
     } catch (error) {
       res.status(400).send({
@@ -208,13 +236,20 @@ export const deleteDataRLTigaTitikSembilanId = async (req, res) => {
     await rlTigaTitikSembilanDetail.destroy({
       where: {
         id: req.params.id,
+        rs_id: req.user.rsId,
       },
     });
     res.status(201).send({
       status: true,
       message: "Delete Data Success",
+      data: {
+        deleted_rows: count,
+      },
     });
   } catch (error) {
-    console.log(error.message);
+    res.status(404).send({
+      status: false,
+      message: error,
+    });
   }
 };

@@ -47,21 +47,29 @@ export const getDataRLTigaTitikDua = (req, res) => {
 };
 
 export const insertDataRLTigaTitikDua = async (req, res) => {
-  //console.log(req.body)
+  const currentYear = new Date().getFullYear();
   const schema = Joi.object({
-    tahun: Joi.number().required(),
+    tahun: Joi.number()
+      .min(currentYear - 1)
+      .required(),
     data: Joi.array()
       .items(
         Joi.object()
           .keys({
-            jenisPelayananId: Joi.number().required(),
-            totalPasienRujukan: Joi.number().required(),
-            totalPasienNonRujukan: Joi.number().required(),
-            tindakLanjutPelayananDirawat: Joi.number().required(),
-            tindakLanjutPelayananDirujuk: Joi.number().required(),
-            // tindakLanjutPelayananPulang: Joi.number().required(),
-            matiDiUGD: Joi.number().required(),
-            doa: Joi.number().required(),
+            jenisPelayananId: Joi.number().min(11).required(),
+            totalPasienRujukan: Joi.number().min(0).max(9999999).required(),
+            totalPasienNonRujukan: Joi.number().min(0).max(9999999).required(),
+            tindakLanjutPelayananDirawat: Joi.number()
+              .min(0)
+              .max(9999999)
+              .required(),
+            tindakLanjutPelayananDirujuk: Joi.number()
+              .min(0)
+              .max(9999999)
+              .required(),
+            // tindakLanjutPelayananPulang: Joi.number().min(0).max(9999999).required(),
+            matiDiUGD: Joi.number().min(0).max(9999999).required(),
+            doa: Joi.number().min(0).max(9999999).required(),
           })
           .required()
       )
@@ -77,28 +85,38 @@ export const insertDataRLTigaTitikDua = async (req, res) => {
     return;
   }
 
-  let transaction;
+  let transaction = await databaseSIRS.transaction();
   try {
-    transaction = await databaseSIRS.transaction();
     const resultInsertHeader = await rlTigaTitikDuaHeader.create(
       {
         rs_id: req.user.rsId,
         tahun: req.body.tahun,
         user_id: req.user.id,
       },
-      { transaction }
+      { transaction: transaction }
     );
 
     let total;
     let totaltindakan;
+    let jumlahPelayananPulang;
     const dataDetail = req.body.data.map((value, index) => {
-      total = value.totalPasienNonRujukan + value.totalPasienNonRujukan;
+      if (value.jenisPelayananId > 15) {
+        console.log("Jenis Pelayanan Salah");
+        throw new SyntaxError("0");
+      }
+
+      total = value.totalPasienRujukan + value.totalPasienNonRujukan;
       totaltindakan =
         value.tindakLanjutPelayananDirawat +
         value.tindakLanjutPelayananDirujuk +
         value.matiDiUGD +
         value.doa;
-      let jumlahPelayananPulang = total - totaltindakan;
+      jumlahPelayananPulang = total - totaltindakan;
+      if (total < totaltindakan) {
+        console.log("Jumlah Tindak Lanjut Pelayanan Pulang Tidak Sesuai");
+        throw new SyntaxError("1");
+      }
+
       return {
         rs_id: req.user.rsId,
         tahun: req.body.tahun,
@@ -115,42 +133,42 @@ export const insertDataRLTigaTitikDua = async (req, res) => {
       };
     });
 
-    if (total >= totaltindakan) {
-      const resultInsertDetail = await rlTigaTitikDuaDetail.bulkCreate(
-        dataDetail,
-        {
-          transaction,
-          updateOnDuplicate: [
-            "total_pasien_rujukan",
-            "total_pasien_non_rujukan",
-            "tindak_lanjut_pelayanan_dirawat",
-            "tindak_lanjut_pelayanan_dirujuk",
-            "tindak_lanjut_pelayanan_pulang",
-            "mati_di_ugd",
-            "doa",
-          ],
-        }
-      );
+    const resultInsertDetail = await rlTigaTitikDuaDetail.bulkCreate(
+      dataDetail,
+      {
+        transaction: transaction,
+      }
+    );
 
-      await transaction.commit();
-      res.status(201).send({
-        status: true,
-        message: "data created",
-        data: {
-          id: resultInsertHeader.id,
-        },
+    await transaction.commit();
+    res.status(201).send({
+      status: true,
+      message: "data created",
+    });
+  } catch (error) {
+    if (error.message == "0") {
+      res.status(400).send({
+        status: false,
+        message: "Jenis Pelayanan Salah",
       });
-    } else {
+    } else if (error.message == "1") {
       res.status(400).send({
         status: false,
         message: "Jumlah Tindak Lanjut Pelayanan Pulang Tidak Sesuai",
       });
+    } else if (error.name === "SequelizeUniqueConstraintError") {
+      res.status(400).send({
+        status: false,
+        message: error,
+      });
+    } else {
+      res.status(400).send({
+        status: false,
+        message: error,
+      });
     }
-  } catch (error) {
-    console.log(error);
-    if (transaction) {
-      await transaction.rollback();
-    }
+
+    await transaction.rollback();
   }
 };
 
@@ -159,6 +177,7 @@ export const deleteDataRLTigaTitikDua = async (req, res) => {
     const count = await rlTigaTitikDuaDetail.destroy({
       where: {
         id: req.params.id,
+        rs_id: req.user.rsId,
       },
     });
     res.status(201).send({
@@ -248,6 +267,17 @@ export const getRLTigaTitikDuaById = async (req, res) => {
 };
 
 export const updateDataRLTigaTitikDua = async (req, res) => {
+  const schema = Joi.object()
+    .keys({
+      totalPasienRujukan: Joi.number().min(0).max(9999999).required(),
+      totalPasienNonRujukan: Joi.number().min(0).max(9999999).required(),
+      tindakLanjutPelayananDirawat: Joi.number().min(0).max(9999999).required(),
+      tindakLanjutPelayananDirujuk: Joi.number().min(0).max(9999999).required(),
+      matiDiUGD: Joi.number().min(0).max(9999999).required(),
+      doa: Joi.number().min(0).max(9999999).required(),
+    })
+    .required();
+
   try {
     const data = req.body;
     let total = data.totalPasienNonRujukan + data.totalPasienNonRujukan;
@@ -271,11 +301,15 @@ export const updateDataRLTigaTitikDua = async (req, res) => {
       const update = await rlTigaTitikDuaDetail.update(dataUPdate, {
         where: {
           id: req.params.id,
+          rs_id: req.user.rsId,
         },
       });
       res.status(201).send({
         status: true,
         message: "Data Diperbaharui",
+        data: {
+          updated_row: update,
+        },
       });
     } else {
       res.status(400).send({
