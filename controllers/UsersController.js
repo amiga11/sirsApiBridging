@@ -384,7 +384,8 @@ export const loginUserBridging = (req, res) => {
         "email",
         "password",
         "rs_id",
-        "is_bridging",
+        "is_active",
+        "kriteria_user_id",
         "created_at",
         "modified_at",
       ],
@@ -401,7 +402,7 @@ export const loginUserBridging = (req, res) => {
         return;
       }
       //   console.log(results);
-      if (results[0].is_bridging === 1) {
+      if (results[0].is_active === 1 && results[0].kriteria_user_id === 2) {
         bcrypt.compare(
           req.body.password,
           results[0].password,
@@ -409,7 +410,7 @@ export const loginUserBridging = (req, res) => {
             if (compareResult == false) {
               res.status(404).send({
                 status: false,
-                message: "wrong password",
+                message: "Password Salah",
               });
               return;
             }
