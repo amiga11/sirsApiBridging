@@ -34,6 +34,12 @@ export const users = databaseSIRS.define(
     modified_at: {
       type: DataTypes.DATE,
     },
+    is_active: {
+        type: DataTypes.INTEGER
+    },
+    kriteria_user_id: {
+        type: DataTypes.INTEGER
+    }
   },
   {
     freezeTableName: true,
