@@ -230,7 +230,7 @@ export const insertDataRLEmpatA = async (req, res) => {
       if (jumlahall <= value.jmlhPasKeluarMati) {
         console.log(
           "Jumlah Pasien Mati Lebih Dari Jumlah Pasien Hidup/Mati Data Ke-" +
-            temp
+          temp
         );
         throw new SyntaxError("1");
       }
@@ -287,6 +287,7 @@ export const insertDataRLEmpatA = async (req, res) => {
     res.status(201).send({
       status: true,
       message: "data created",
+      data: resultInsertDetail.id
     });
   } catch (error) {
     // console.log(error.message);

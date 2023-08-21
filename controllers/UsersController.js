@@ -336,7 +336,7 @@ export const insertDataUserBridging = async (req, res) => {
           password: hashed,
           rs_id: req.user.rsId,
           jenis_user_id: 4,
-          is_bridging: 1,
+          is_active: 1,
         })
         .then(function () {
           res.status(200).json({ message: "User Bridging Berhasil di Buat" });

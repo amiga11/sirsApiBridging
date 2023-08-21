@@ -25,9 +25,9 @@ export const users = databaseSIRS.define(
     no_telepon: {
       type: DataTypes.STRING,
     },
-    is_bridging: {
-      type: DataTypes.INTEGER,
-    },
+    // is_bridging: {
+    //   type: DataTypes.INTEGER,
+    // },
     created_at: {
       type: DataTypes.DATE,
     },
@@ -35,10 +35,10 @@ export const users = databaseSIRS.define(
       type: DataTypes.DATE,
     },
     is_active: {
-        type: DataTypes.INTEGER
+      type: DataTypes.INTEGER
     },
     kriteria_user_id: {
-        type: DataTypes.INTEGER
+      type: DataTypes.INTEGER
     }
   },
   {
