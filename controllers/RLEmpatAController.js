@@ -283,11 +283,17 @@ export const insertDataRLEmpatA = async (req, res) => {
     const resultInsertDetail = await rlEmpatADetail.bulkCreate(dataDetail, {
       transaction: transaction,
     });
+
+    const dataid = resultInsertDetail.map((value, index) => {
+      return {
+        id: value.id,
+      };
+    });
     await transaction.commit();
     res.status(201).send({
       status: true,
       message: "data created",
-      data: resultInsertDetail.id
+      data: dataid
     });
   } catch (error) {
     // console.log(error.message);

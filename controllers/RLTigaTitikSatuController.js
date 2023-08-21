@@ -214,14 +214,20 @@ export const insertDataRLTigaTitikSatu = async (req, res) => {
       };
     });
 
-    await rlTigaTitikSatuDetail.bulkCreate(dataDetail, {
+    const resultInsertDetail = await rlTigaTitikSatuDetail.bulkCreate(dataDetail, {
       transaction: transaction,
     });
 
+    const dataid = resultInsertDetail.map((value, index) => {
+      return {
+        id: value.id,
+      };
+    });
     await transaction.commit();
     res.status(201).send({
       status: true,
       message: "data created",
+      data: dataid
     });
   } catch (error) {
     console.log(error);

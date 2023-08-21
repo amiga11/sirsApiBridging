@@ -232,7 +232,7 @@ export const insertDataRLEmpatASebab = async (req, res) => {
       if (jumlahall <= value.jmlhPasKeluarMati) {
         console.log(
           "Jumlah Pasien Mati Lebih Dari Jumlah Pasien Hidup/Mati Data Ke-" +
-            temp
+          temp
         );
         throw new SyntaxError("1");
       }
@@ -289,10 +289,17 @@ export const insertDataRLEmpatASebab = async (req, res) => {
         transaction: transaction,
       }
     );
+
+    const dataid = resultInsertDetail.map((value, index) => {
+      return {
+        id: value.id,
+      };
+    });
     await transaction.commit();
     res.status(201).send({
       status: true,
       message: "data created",
+      data: dataid
     });
   } catch (error) {
     if (error.message == "0") {

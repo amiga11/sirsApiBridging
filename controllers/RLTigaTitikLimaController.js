@@ -136,7 +136,7 @@ export const insertDataRLTigaTitikLima = async (req, res) => {
       };
     });
 
-    console.log(dataDetail);
+    // console.log(dataDetail);
 
     dataDetail.map((value, index) => {
       varTotal = value.rmTotal + value.rnmTotal + value.nrTotal;
@@ -178,10 +178,16 @@ export const insertDataRLTigaTitikLima = async (req, res) => {
       }
     );
 
+    const dataid = resultInsertDetail.map((value, index) => {
+      return {
+        id: value.id,
+      };
+    });
     await transaction.commit();
     res.status(201).send({
       status: true,
       message: "data created",
+      data: dataid
     });
   } catch (error) {
     console.log(error.message);

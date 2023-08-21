@@ -157,7 +157,7 @@ export const insertDataRLTigaTitikEmpat = async (req, res) => {
       }
     });
 
-    await rlTigaTitikEmpatDetail.bulkCreate(dataDetail, {
+    const resultInsertDetail = await rlTigaTitikEmpatDetail.bulkCreate(dataDetail, {
       transaction,
       updateOnDuplicate: [
         "rmRumahSakit",
@@ -176,10 +176,16 @@ export const insertDataRLTigaTitikEmpat = async (req, res) => {
         "dirujuk",
       ],
     });
+    const dataid = resultInsertDetail.map((value, index) => {
+      return {
+        id: value.id,
+      };
+    });
     await transaction.commit();
     res.status(201).send({
       status: true,
       message: "data created",
+      data: dataid
     });
   } catch (error) {
     if (transaction) {

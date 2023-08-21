@@ -187,6 +187,7 @@ export const insertDataRLSatuTitikDua = async (req, res) => {
     res.status(201).send({
       status: true,
       message: "data created",
+      data: resultInsertDetail.id
     });
   } catch (error) {
     console.log(error);

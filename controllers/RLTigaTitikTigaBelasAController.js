@@ -216,10 +216,16 @@ export const insertDataRLTigaTitikTigaBelasA = async (req, res) => {
       }
     );
 
+    const dataid = resultInsertDetail.map((value, index) => {
+      return {
+        id: value.id,
+      };
+    });
     await transaction.commit();
     res.status(201).send({
       status: true,
       message: "data created",
+      data: dataid
     });
   } catch (error) {
     console.log(error);

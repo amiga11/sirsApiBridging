@@ -121,11 +121,18 @@ export const insertDataRLLimaTitikDua = async (req, res) => {
         transaction: transaction,
       }
     );
-    // console.log(resultInsertDetail[0].id)
+
+
+    const dataid = resultInsertDetail.map((value, index) => {
+      return {
+        id: value.id,
+      };
+    });
     await transaction.commit();
     res.status(201).send({
       status: true,
       message: "data created",
+      data: dataid
     });
   } catch (error) {
     console.log(error);
